@@ -1,5 +1,5 @@
 import test from 'tape';
-import {ValidationResult} from '../src/validation-result';
+import ValidationResult from '../src/validation-result';
 
 function v(result) {
   return new ValidationResult(result);

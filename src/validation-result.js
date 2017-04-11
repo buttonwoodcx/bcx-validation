@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export class ValidationResult {
+export default class ValidationResult {
 
   // normalize validation result
   constructor(result) {

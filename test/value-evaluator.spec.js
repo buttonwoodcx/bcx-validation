@@ -1,5 +1,5 @@
 import test from 'tape';
-import {valueEvaluator} from '../src/value-evaluator';
+import valueEvaluator from '../src/value-evaluator';
 import {createSimpleScope} from 'bcx-expression-evaluator';
 
 const $value = "abc";

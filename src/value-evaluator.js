@@ -3,7 +3,7 @@ import {Parser} from 'bcx-expression-evaluator';
 
 const parser = new Parser();
 
-export function valueEvaluator(input, opts) {
+export default function (input, opts) {
 
   if (_.isString(input)) {
     const expression = parser.parse(input, opts);
