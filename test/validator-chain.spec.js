@@ -1,6 +1,6 @@
 import test from 'tape';
 import _ from 'lodash';
-import chainValidator from '../src/chain-validator';
+import validatorChain from '../src/validator-chain';
 
 const validators = [
   scope => ({t:0, break: scope.breakAt0}),
@@ -8,16 +8,16 @@ const validators = [
   scope => ({t:2, break: scope.breakAt2}),
 ];
 
-const chain = chainValidator(validators);
+const chain = validatorChain(validators);
 
-test('chainValidator: chains results', t => {
+test('validatorChain: chains results', t => {
   const result = chain({});
   t.equal(result.length, 3);
   t.deepEqual(_.map(result, 't'), [0, 1, 2]);
   t.end();
 });
 
-test('chainValidator: support early break', t => {
+test('validatorChain: support early break', t => {
   let result = chain({breakAt0: true});
   t.equal(result.length, 1);
   t.deepEqual(_.map(result, 't'), [0]);
