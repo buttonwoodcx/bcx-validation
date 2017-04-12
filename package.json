@@ -1,17 +1,17 @@
 {
-  "name": "bcx-validator",
+  "name": "bcx-validation",
   "version": "0.1.0",
   "description": "Buttonwood validator",
   "keywords": [
     "validation"
   ],
-  "homepage": "http://github.com/buttonwoodcx/bcx-validator",
+  "homepage": "http://github.com/buttonwoodcx/bcx-validation",
   "bugs": {
-    "url": "https://github.com/buttonwoodcx/bcx-validator/issues"
+    "url": "https://github.com/buttonwoodcx/bcx-validation/issues"
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/buttonwoodcx/bcx-validator"
+    "url": "http://github.com/buttonwoodcx/bcx-validation"
   },
   "license": "MIT",
   "author": "Chunpeng Huo",

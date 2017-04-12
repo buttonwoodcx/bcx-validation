@@ -1,2 +1,2 @@
-# bcx-validator
+# bcx-validation
 

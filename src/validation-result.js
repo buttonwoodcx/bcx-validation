@@ -6,7 +6,7 @@ export default class ValidationResult {
   constructor(result) {
     this.isValid = true;
     this.messages = [];
-    this.break = false;
+    this.break = false; // used in validator-chain to break early
 
     if (_.isUndefined(result) || _.isNull(result)) return;
 
