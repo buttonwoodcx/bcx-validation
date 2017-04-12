@@ -6,6 +6,13 @@
     "validation"
   ],
   "homepage": "http://github.com/buttonwoodcx/bcx-validator",
+  "bugs": {
+    "url": "https://github.com/buttonwoodcx/bcx-validator/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/buttonwoodcx/bcx-validator"
+  },
   "license": "MIT",
   "author": "Chunpeng Huo",
   "devDependencies": {
@@ -24,6 +31,8 @@
   "scripts": {
     "build": "rollup -c",
     "lint": "eslint src",
+    "prepare": "npm run build",
+    "preversion": "npm test",
     "pretest": "npm run lint",
     "test": "env BABEL_ENV=test tape -r babel-register 'test/**/*.spec.js' | faucet"
   },
