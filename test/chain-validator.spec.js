@@ -3,9 +3,9 @@ import _ from 'lodash';
 import chainValidator from '../src/chain-validator';
 
 const validators = [
-  {validate: (scope) => ({t:0, break: scope.breakAt0})},
-  {validate: (scope) => ({t:1, break: scope.breakAt1})},
-  {validate: (scope) => ({t:2, break: scope.breakAt2})},
+  scope => ({t:0, break: scope.breakAt0}),
+  scope => ({t:1, break: scope.breakAt1}),
+  scope => ({t:2, break: scope.breakAt2}),
 ];
 
 const chain = chainValidator(validators);

@@ -5,7 +5,7 @@ export default function (validators) {
     let results = [];
 
     _.each(validators, validator => {
-      const result = validator.validate(scope);
+      const result = validator(scope);
       results.push(result);
 
       // early break

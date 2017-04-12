@@ -6,10 +6,17 @@ export default class ValidationResult {
   constructor(result) {
     this.isValid = true;
     this.messages = [];
+    this.break = false;
 
     if (_.isUndefined(result) || _.isNull(result)) return;
 
-    if (_.isString(result)) {
+    if (_.isBoolean(result)) {
+      this.isValid = result;
+      if (!this.isValid) {
+        // default error message
+        this.addErrorMessage('invalid');
+      }
+    } else if (_.isString(result)) {
       this.addErrorMessage(result);
     } else if (_.isArray(result)) {
       _.each(result, r => {
@@ -27,7 +34,8 @@ export default class ValidationResult {
         }
       });
     } else if (_.has(result, 'isValid')) {
-      this.isValid = result.isValid ? true : false;
+      this.isValid = !!result.isValid;
+      this.break = !!result.break;
       if (this.isValid) return;
 
       this.addErrorMessage(result.message);
@@ -38,7 +46,7 @@ export default class ValidationResult {
 
       if (_.isEmpty(this.messages)) {
         // default error message
-        this.messages.push('invalid');
+        this.addErrorMessage('invalid');
       }
     } else {
       throw new Error(`Unexpected validation result:${result}`);
