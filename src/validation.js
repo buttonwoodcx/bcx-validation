@@ -2,7 +2,7 @@ import buildValidator from './build-validator';
 import {evaluate, createOverrideContext, createSimpleScope} from 'bcx-expression-evaluator';
 import valueEvaluator from './value-evaluator';
 import scopeVariation from './scope-variation';
-import standardValidators from './standard-validators';
+import {standardTransformers, standardValidators} from './standard-validators';
 import _ from 'lodash';
 
 const NAME_FORMAT = /^[a-z][a-z0-9_]+/i;
@@ -10,15 +10,36 @@ const NAME_FORMAT_ERROR = 'validation name must start with a letter, followed by
 
 class Validation {
 
-  constructor() {
+  constructor(opts = {}) {
     this.resolveValidator = this.resolveValidator.bind(this);
 
     this.availableValidators = [];
-    // do we need a flag to opt-out standard validators?
-    this.withStandardValidators();
+
+    if (!opts.withoutStandardValidators) {
+      this.withStandardValidators();
+    }
   }
 
   withStandardValidators() {
+    _.each(standardTransformers, pair => {
+      const [tester, transformer] = pair;
+
+      let testFunc;
+      if (_.isFunction(tester)) {
+        testFunc = tester;
+      } else if (_.isString(tester)) {
+        testFunc = rule => {
+          // console.log(' transformer tester:'+tester);
+          // console.log('  testing rule:'+JSON.stringify(rule));
+          return evaluate(tester, rule, {_});
+        };
+      } else {
+        throw new Error('Invalid transformer tester: ' + tester);
+      }
+
+      this.addTransformer(testFunc, transformer);
+    });
+
     _.each(standardValidators, pair => {
       const [name, imp] = pair;
       this.addValidator(name, imp);
@@ -26,25 +47,54 @@ class Validation {
   }
 
   resolveValidator(rule) {
-    const found = _.find(this.availableValidators, v => evaluate(v.test, rule));
+    // console.log('resolveValidator: ' + JSON.stringify(rule));
+
+    const found = _.find(this.availableValidators, v => v.test(rule));
     if (!found) return;
 
-    const {validator} = found;
-    const value = _.get(rule, 'value', '');
-    const options = _.omit(rule, ['value', 'validate']);
+    const {validatorImp, transformer} = found;
+    if (validatorImp) {
+      const validator = buildValidator(validatorImp, this.resolveValidator);
+      const value = _.get(rule, 'value', '');
+      const options = _.omit(rule, ['value', 'validate']);
 
-    if (_.isEmpty(value) && _.isEmpty(options)) return validator;
+      let valueEval;
+      try {
+        valueEval = valueEvaluator(value);
+      } catch (e) {}
 
-    // otherwise, override scope with value and options
-    return scope => {
-      let variation = {...options};
-
-      if (value) {
-        variation.$value = valueEvaluator(value)(scope);
+      if (!valueEval && _.isEmpty(options)) {
+        return validator;
       }
 
-      return validator(scopeVariation(scope, variation));
-    };
+      // otherwise, override scope with value and options
+      return scope => {
+        let variation = {};
+        // prefix option name with $ in scope to reduce chance of conflict
+        _.each(options, (v, name) => variation[`$${name}`] = v);
+
+        if (valueEval) {
+          variation.$value = valueEval(scope);
+        }
+
+        // console.log('');
+        // console.log('eval rule: '+ JSON.stringify(rule));
+        // console.log('with variation ' + JSON.stringify(variation));
+        // console.log('');
+        return validator(scopeVariation(scope, variation));
+      };
+    } else {
+      // transformer
+      return buildValidator(transformer(rule), this.resolveValidator);
+    }
+
+  }
+
+  addTransformer(tester, transformer) {
+    this.availableValidators.push({
+      test: tester,
+      transformer
+    });
   }
 
   addValidator(validationName, imp) {
@@ -58,14 +108,15 @@ class Validation {
     const tester = `validate === '${name}'`;
 
     this.availableValidators.push({
-      test: tester,
-      validator: buildValidator(imp, this.resolveValidator)
+      test: rule => evaluate(tester, rule, {_}),
+      validatorImp: imp
     });
   }
 
   validate(model, rulesMap, helper = {}) {
-    // by default add lodash to helper
-    const scope = createSimpleScope(model, {_, ...helper});
+    // use ...model to avoid scope variation to pollute model
+    // add lodash to helper by default
+    const scope = createSimpleScope({...model}, {_, ...helper});
     return this._validate(scope, rulesMap);
   }
 
@@ -81,8 +132,10 @@ class Validation {
         $propertyName: propertyName,
       });
 
+      // try if it's a single validation
       const singleValidation = this.resolveValidator(rules);
 
+      // wrap single validation in array
       if (singleValidation ||
           _.isString(rules) ||
           _.isRegExp(rules) ||
@@ -91,8 +144,8 @@ class Validation {
       }
 
       if (_.isArray(rules)) {
-        const valiadtor = buildValidator(rules, this.resolveValidator);
-        const result = valiadtor(localScope);
+        const validator = buildValidator(rules, this.resolveValidator);
+        const result = validator(localScope);
         if (!result.isValid) {
           error[propertyName] = result.messages;
         }

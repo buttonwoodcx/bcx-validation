@@ -38,7 +38,7 @@
   },
   "main": "dist/index.js",
   "dependencies": {
-    "bcx-expression-evaluator": "^0.1.0",
+    "bcx-expression-evaluator": "^0.1.2",
     "lodash": "^4.17.4"
   }
 }

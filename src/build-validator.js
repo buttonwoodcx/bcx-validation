@@ -45,6 +45,8 @@ export default function buildValidator (rule, validatorResolve) {
 
   let validator;
 
+  // console.log('buildValidator: ' + JSON.stringify(rule));
+
   if (_.isFunction(rule)) {
     // raw rule in function
     validator = rawValidator(rule);
@@ -53,8 +55,14 @@ export default function buildValidator (rule, validatorResolve) {
     const subRules = _.map(rule, r => buildValidator(r, validatorResolve));
     validator = validatorChain(subRules);
   } else if ((_.isString(rule) && !_.isEmpty(rule)) || _.isRegExp(rule)) {
-    // wrap single expression/regex in isTrue
-    validator = validatorResolve({validate: "isTrue", value: rule});
+    // try validator tranformer first
+    // like we transform "mandatory" to {validate: "mandatory"}
+    validator = validatorResolve(rule);
+
+    if (!validator) {
+      // wrap single expression/regex in isTrue
+      validator = validatorResolve({validate: "isTrue", value: rule});
+    }
   } else if (_.isPlainObject(rule)) {
     const rawRule = _.omit(rule, ['message',
                                   'stopValidationChainIfPass',
@@ -64,7 +72,7 @@ export default function buildValidator (rule, validatorResolve) {
   }
 
   if (!_.isFunction(validator)) {
-    throw new Error(`Unsupported rule: ${rule}`);
+    throw new Error('Unsupported rule: ' + JSON.stringify(rule));
   }
 
   return standardValidatorWrap(validator, {message,
