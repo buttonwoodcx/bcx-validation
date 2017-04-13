@@ -61,6 +61,7 @@ export default class ValidationResult {
 
     this.isValid = false;
 
+    // avoid duplication
     if (_.includes(this.messages, trimed)) return;
     this.messages.push(trimed);
   }

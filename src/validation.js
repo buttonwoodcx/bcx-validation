@@ -2,7 +2,7 @@ import buildValidator from './build-validator';
 import {evaluate, createOverrideContext, createSimpleScope} from 'bcx-expression-evaluator';
 import valueEvaluator from './value-evaluator';
 import scopeVariation from './scope-variation';
-import {standardTransformers, standardValidators} from './standard-validators';
+import {config as configStandardValidators} from './standard-validators';
 import _ from 'lodash';
 
 const NAME_FORMAT = /^[a-z][a-z0-9_]+/i;
@@ -12,6 +12,7 @@ class Validation {
 
   constructor(opts = {}) {
     this.resolveValidator = this.resolveValidator.bind(this);
+    this.buildValidator = r => buildValidator(r, this.resolveValidator);
 
     this.availableValidators = [];
 
@@ -21,29 +22,7 @@ class Validation {
   }
 
   withStandardValidators() {
-    _.each(standardTransformers, pair => {
-      const [tester, transformer] = pair;
-
-      let testFunc;
-      if (_.isFunction(tester)) {
-        testFunc = tester;
-      } else if (_.isString(tester)) {
-        testFunc = rule => {
-          // console.log(' transformer tester:'+tester);
-          // console.log('  testing rule:'+JSON.stringify(rule));
-          return evaluate(tester, rule, {_});
-        };
-      } else {
-        throw new Error('Invalid transformer tester: ' + tester);
-      }
-
-      this.addTransformer(testFunc, transformer);
-    });
-
-    _.each(standardValidators, pair => {
-      const [name, imp] = pair;
-      this.addValidator(name, imp);
-    });
+    configStandardValidators(this);
   }
 
   resolveValidator(rule) {
@@ -54,7 +33,7 @@ class Validation {
 
     const {validatorImp, transformer} = found;
     if (validatorImp) {
-      const validator = buildValidator(validatorImp, this.resolveValidator);
+      const validator = this.buildValidator(validatorImp);
       const value = _.get(rule, 'value', '');
       const options = _.omit(rule, ['value', 'validate']);
 
@@ -83,16 +62,32 @@ class Validation {
         // console.log('');
         return validator(scopeVariation(scope, variation));
       };
-    } else {
+    } else if (transformer) {
       // transformer
-      return buildValidator(transformer(rule), this.resolveValidator);
+      const transformed = transformer(rule, this.buildValidator);
+      if (transformed.beenBuilt) {
+        return transformed;
+      } else {
+        return this.buildValidator(transformed);
+      }
+    } else {
+      throw new Error('No transformer or validatorImp defined.');
     }
 
   }
 
   addTransformer(tester, transformer) {
+    let testFunc;
+    if (_.isFunction(tester)) {
+      testFunc = tester;
+    } else if (_.isString(tester)) {
+      testFunc = rule => evaluate(tester, rule, {_});
+    } else {
+      throw new Error('Invalid transformer tester: ' + tester);
+    }
+
     this.availableValidators.push({
-      test: tester,
+      test: testFunc,
       transformer
     });
   }
@@ -144,7 +139,7 @@ class Validation {
       }
 
       if (_.isArray(rules)) {
-        const validator = buildValidator(rules, this.resolveValidator);
+        const validator = this.buildValidator(rules);
         const result = validator(localScope);
         if (!result.isValid) {
           error[propertyName] = result.messages;
