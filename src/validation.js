@@ -13,12 +13,8 @@ class Validation {
   constructor(opts = {}) {
     this.resolveValidator = this.resolveValidator.bind(this);
     this.buildValidator = r => buildValidator(r, this.resolveValidator);
-
     this.availableValidators = [];
-
-    if (!opts.withoutStandardValidators) {
-      this.withStandardValidators();
-    }
+    this.withStandardValidators();
   }
 
   withStandardValidators() {
@@ -65,7 +61,7 @@ class Validation {
     } else if (transformer) {
       // transformer
       const transformed = transformer(rule, this.buildValidator);
-      if (transformed.beenBuilt) {
+      if (transformed.readyToUse) {
         return transformed;
       } else {
         return this.buildValidator(transformed);

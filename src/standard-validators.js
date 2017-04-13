@@ -52,7 +52,7 @@ export const forEachTransformer = function (rule, buildValidator) {
 
   };
 
-  validator.beenBuilt = true;
+  validator.readyToUse = true;
   return validator;
 };
 
