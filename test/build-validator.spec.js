@@ -13,6 +13,9 @@ function validatorResolveDummy(rule) {
     result.isValid = rule.mock === 'pass';
     result.break = !!rule.break;
     return () => result;
+  } else if (rule === 'notTrue') {
+    const e = valueEvaluator('$value');
+    return scope => !e(scope);
   }
   // else return nothing
 };
@@ -63,6 +66,16 @@ test('buildValidator: builds on raw func with early break on fail', t => {
 test('buildValidator: wraps bare expression, override $value to test', t => {
   const validator = buildValidator("a > 3", validatorResolveDummy);
   t.deepEqual(validator(createSimpleScope({$value: 1, a: 4}, {})),
+              {isValid: true, messages: [], break: false});
+
+  t.deepEqual(validator(createSimpleScope({$value: 1, a: 2}, {})),
+              {isValid: false, messages: ['invalid'], break: false});
+  t.end();
+});
+
+test('buildValidator: transform single string with validatorResolve', t => {
+  const validator = buildValidator("notTrue", validatorResolveDummy);
+  t.deepEqual(validator(createSimpleScope({$value: 0, a: 4}, {})),
               {isValid: true, messages: [], break: false});
 
   t.deepEqual(validator(createSimpleScope({$value: 1, a: 2}, {})),
