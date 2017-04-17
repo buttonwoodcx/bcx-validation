@@ -45,6 +45,25 @@ test('ValidationResult: can set inValid and message(s) explictly, remove duplica
   t.end();
 });
 
+test('ValidationResult: can skip inValid explictly', t => {
+  t.deepEqual(v({isValid: null}), {isValid: null, messages: [], break: false});
+  t.deepEqual(v({isValid: null, break: true}), {isValid: null, messages: [], break: true});
+  t.end();
+});
+
+test('ValidationResult: handles tri-state isValid', t => {
+  t.deepEqual(v([{isValid: true}, {isValid: true}]), {isValid: true, messages: [], break: false});
+  t.deepEqual(v([{isValid: null}, {isValid: null}]), {isValid: null, messages: [], break: false});
+  t.deepEqual(v([{isValid: false}, {isValid: false}]), {isValid: false, messages: ['invalid'], break: false});
+  t.deepEqual(v([{isValid: null}, {isValid: true}]), {isValid: true, messages: [], break: false});
+  t.deepEqual(v([{isValid: true}, {isValid: null}]), {isValid: true, messages: [], break: false});
+  t.deepEqual(v([{isValid: true}, {isValid: false}]), {isValid: false, messages: ['invalid'], break: false});
+  t.deepEqual(v([{isValid: false}, {isValid: true}]), {isValid: false, messages: ['invalid'], break: false});
+  t.deepEqual(v([{isValid: null}, {isValid: false}]), {isValid: false, messages: ['invalid'], break: false});
+  t.deepEqual(v([{isValid: false}, {isValid: null}]), {isValid: false, messages: ['invalid'], break: false});
+  t.end();
+});
+
 test('ValidationResult: processes nested result, remove duplicated messages', t => {
   const result = [
     "foo",

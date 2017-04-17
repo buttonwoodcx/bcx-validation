@@ -19,6 +19,7 @@ export default class ValidationResult {
     } else if (_.isString(result)) {
       this.addErrorMessage(result);
     } else if (_.isArray(result)) {
+      let finalIsValid = null;
       _.each(result, r => {
         let validationResult;
         if (r instanceof ValidationResult) {
@@ -27,16 +28,28 @@ export default class ValidationResult {
           validationResult = new ValidationResult(r);
         }
 
-        if (!validationResult.isValid) {
+        if (validationResult.isValid === true) {
+          if (finalIsValid !== false) finalIsValid = true;
+        } else if (validationResult.isValid === false) {
+          finalIsValid = false;
           _.each(validationResult.messages, m => {
             this.addErrorMessage(m);
           });
         }
+
+        this.isValid = finalIsValid;
       });
     } else if (_.has(result, 'isValid')) {
-      this.isValid = !!result.isValid;
+      // isValid is tri-state
+      // true, false, or null (don't care, skip)
+      if (result.isValid === null) {
+        this.isValid = null;
+      } else {
+        this.isValid = !!result.isValid;
+      }
+
       this.break = !!result.break;
-      if (this.isValid) return;
+      if (this.isValid !== false) return;
 
       this.addErrorMessage(result.message);
 
