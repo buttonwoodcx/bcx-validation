@@ -29,6 +29,12 @@ class Validation {
 
     const {validatorImp, transformer} = found;
     if (validatorImp) {
+      // value & options can only been processed here,
+      // not in buildValidator.
+      // As only resolveValidator knows there the rule obj
+      // is a validatorImp or transformer,
+      // only validatorImp creates scope variation to
+      // override $value and options.
       const validator = this.buildValidator(validatorImp);
       const value = _.get(rule, 'value', '');
       const options = _.omit(rule, ['value', 'validate']);
@@ -137,7 +143,7 @@ class Validation {
       if (_.isArray(rules)) {
         const validator = this.buildValidator(rules);
         const result = validator(localScope);
-        if (!result.isValid) {
+        if (result.isValid === false) {
           error[propertyName] = result.messages;
         }
       } else if (_.isPlainObject(rules)) {

@@ -30,6 +30,32 @@ test('passImmediatelyIf: pass immediately', t => {
   t.end();
 });
 
+test('skipImmediatelyIf: skip immediately', t => {
+  let rule = {
+    a: [
+      {validate: 'skipImmediatelyIf'},
+      {validate: /^good/, message: 'not good :-('}
+    ]
+  };
+
+  t.deepEqual(v.validate({a: ""}, rule), {a: ['not good :-(']});
+  t.deepEqual(v.validate({a: "bad"}, rule), {});
+  t.deepEqual(v.validate({a: "good"}, rule), {});
+
+  rule = {
+    a: [
+      {validate: 'skipImmediatelyIf', value: "!$value"},
+      {validate: /^good/, message: 'not good :-('}
+    ]
+  };
+
+  t.deepEqual(v.validate({a: ""}, rule), {});
+  t.deepEqual(v.validate({a: "bad"}, rule), {a: ['not good :-(']});
+  t.deepEqual(v.validate({a: "good"}, rule), {});
+
+  t.end();
+});
+
 test('failImmediatelyIf: fail immediately', t => {
   let rule = {
     a: [

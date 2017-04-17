@@ -17,10 +17,9 @@ export const ifTransformer = function (rule) {
 
   let rules = [];
   // if condition is false, skip the real validation
-  rules.push({validate: "passImmediatelyIf", value: `!(${_if})`});
+  rules.push({validate: "skipImmediatelyIf", value: `!(${_if})`});
 
-  if (_.size(subRule) === 1 &&
-      _.has(subRule, 'group') &&
+  if (_.has(subRule, 'group') &&
       _.isArray(subRule.group)) {
     rules.push(... subRule.group);
   } else {
@@ -36,10 +35,10 @@ export const switchTransformer = function (rule) {
 
   let rules = [];
 
-  _.each(cases, (rules, _case) => {
+  _.each(cases, (subRules, _case) => {
     rules.push({
       if: `(${_switch}) == ${JSON.stringify(_case)}`,
-      group: _.isArray(rules) ? rules : [rules]
+      group: _.isArray(subRules) ? subRules : [subRules]
     });
   });
 
@@ -56,17 +55,9 @@ export const forEachTransformer = function (rule, buildValidator) {
   return validator;
 };
 
+// The order of transformers and validators is very important.
+// It is the order that resolveValidator finds a match.
 export const standardTransformers = [
-
-  // transform regex
-  ["_.isRegExp($this)", rule => ({validate: "isTrue", value: rule})],
-  ["_.isRegExp(validate)", rule => ({validate: "isTrue", value: rule.validate})],
-
-  // transform "mandatory"
-  ["$this === 'mandatory'", () => ({validate: "mandatory"})],
-
-  // transform "notMandatory"
-  ["$this === 'notMandatory'", () => ({validate: "notMandatory"})],
 
   // if a rule contains {if: 'expression'}
   // transform it into a chain of validators
@@ -98,6 +89,21 @@ export const standardTransformers = [
 
   // TODO foreach
   // need to create new binding context, put existing context on overrideContext
+
+
+  // transform regex
+  ["_.isRegExp($this)", rule => ({validate: "isTrue", value: rule})],
+  ["_.isRegExp(validate)", rule => ({validate: "isTrue", value: rule.validate})],
+
+  // transform "mandatory"
+  ["$this === 'mandatory'", () => ({validate: "mandatory"})],
+
+  // transform "notMandatory"
+  ["$this === 'notMandatory'", () => ({validate: "notMandatory"})],
+
+  // transform "email"
+  ["$this === 'email'", () => ({validate: "email"})],
+
 ];
 
 export const standardValidators = [
@@ -107,6 +113,13 @@ export const standardValidators = [
   ["passImmediatelyIf", v => v ?
                              // stop the chain if passed
                              {isValid: true, break: true} :
+                             // continue, never fail
+                             null],
+
+  ["skipImmediatelyIf", v => v ?
+                             // skip rest if passed
+                             // isValid is not true, but null
+                             {isValid: null, break: true} :
                              // continue, never fail
                              null],
 
@@ -123,7 +136,7 @@ export const standardValidators = [
   ["notBlank", {validate: "isFalse", value: isBlank, message: "must not be blank"}],
 
   ["mandatory", {validate: "failImmediatelyIf", value: isBlank, message: "must not be empty"}],
-  ["notMandatory", {validate: "passImmediatelyIf", value: isBlank}],
+  ["notMandatory", {validate: "skipImmediatelyIf", value: isBlank}],
 
   // {validate: 'number', integer: true, min: 0, max: 10, greaterThan: 0, lessThan: 10, even: true, /* odd: true */}
   ["number", [
@@ -147,8 +160,8 @@ export const standardValidators = [
   // {validate: 'string', minLength: 4, maxLength: 8}
   ["string", [
     {validate: "isTrue", value: "_.isString($value)", message: "must be a string", stopValidationChainIfFail: true},
-    {if: "$minLength", validate: "isTrue", value: "_.size($value) >= $minLength", message: "must has at least ${$minLength} characters long"},
-    {if: "$maxLength", validate: "isTrue", value: "_.size($value) <= $maxLength", message: "must be no more than ${$maxLength} characters long"}
+    {if: "$minLength", validate: "isTrue", value: "_.size($value) >= $minLength", message: "must has at least ${$minLength} characters"},
+    {if: "$maxLength", validate: "isTrue", value: "_.size($value) <= $maxLength", message: "must be no more than ${$maxLength} characters"}
   ]],
 
   // {validate: 'within', items: [ ... ]}
@@ -179,6 +192,10 @@ export const standardValidators = [
     {if: '$digit', validate: /[0-9]/, message: 'must contain number'},
     {if: '$specialChar', validate: /[!@#$%^&*()\-_=+\[\]{}\\|;:'",<.>\/?]/, message: 'must contain special character (like !@$%)'},
   ]],
+
+  // email regex from https://html.spec.whatwg.org/multipage/forms.html#valid-e-mail-address
+  ["email", {validate: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+             message: "not a valid email"}],
 
   // TODO unique. need to access neighbours
 ];

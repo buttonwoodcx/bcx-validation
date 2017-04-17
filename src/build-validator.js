@@ -16,8 +16,8 @@ function standardValidatorWrap(validator, opts = {}) {
                            null;
   return scope => {
     let result = new ValidationResult(validator(scope));
-    const forceBreak = (result.isValid && stopValidationChainIfPass) ||
-                    (!result.isValid && stopValidationChainIfFail);
+    const forceBreak = (result.isValid === true && stopValidationChainIfPass) ||
+                    (result.isValid === false && stopValidationChainIfFail);
 
     const overrideMessage = (!result.isValid && messageEvaluator) ?
                             messageEvaluator(scope) :
