@@ -13,6 +13,7 @@ class Validation {
   constructor(opts = {}) {
     this.resolveValidator = this.resolveValidator.bind(this);
     this.buildValidator = r => buildValidator(r, this.resolveValidator);
+    this._validate = this._validate.bind(this);
     this.availableValidators = [];
     this.withStandardValidators();
   }
@@ -66,7 +67,7 @@ class Validation {
       };
     } else if (transformer) {
       // transformer
-      const transformed = transformer(rule, this.buildValidator);
+      const transformed = transformer(rule, this._validate);
       if (transformed.readyToUse) {
         return transformed;
       } else {
@@ -117,12 +118,13 @@ class Validation {
     return this._validate(scope, rulesMap);
   }
 
-  _validate(scope, rulesMap) {
+  _validate(scope, rulesMap, inPropertyName) {
     let error = {};
 
     _.each(rulesMap, (rules, propertyName) => {
-      const value = valueEvaluator(propertyName)(scope);
-      // console.log('propertyName:'+propertyName);
+      const path = inPropertyName ? `${inPropertyName}.${propertyName}` : propertyName;
+      const value = valueEvaluator(path)(scope);
+      // console.log('path:'+path);
       // console.log('value:'+value);
       const localScope = scopeVariation(scope, {
         $value: value,
@@ -147,9 +149,11 @@ class Validation {
           error[propertyName] = result.errors;
         }
       } else if (_.isPlainObject(rules)) {
-        const nested = rules;
+        const nestedErrors = this._validate(scope, rules, path);
 
-        // TODO
+        if (!_.isEmpty(nestedErrors)) {
+          error[propertyName] = nestedErrors;
+        }
       }
 
     });

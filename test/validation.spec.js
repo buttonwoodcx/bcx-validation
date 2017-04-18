@@ -51,3 +51,84 @@ test('Validate: validates whole object', t => {
   t.end();
 });
 
+test('Validate: validates nested object', t => {
+  let rule = {
+    detail: {
+      name: [
+        {validate: "mandatory"},
+        {validate: /[a-z]/i, message: "must only contain letters"}
+      ],
+      age: [
+        "notMandatory",
+        {validate: "number", integer: true, min: 0, max: 99}
+      ]
+    },
+    id: "mandatory"
+  };
+
+
+  t.deepEqual(v.validate({detail: {name: "", age: 100}}, rule), {
+    id: ["must not be empty"],
+    detail: {
+      name: ["must not be empty"],
+      age: ["must be no more than 99"]
+    }
+  });
+
+  t.deepEqual(v.validate({detail: {name: "", age: 100}, id: 2}, rule), {
+    detail: {
+      name: ["must not be empty"],
+      age: ["must be no more than 99"]
+    }
+  });
+
+  t.end();
+});
+
+test('Validate: validates deep nested object', t => {
+  let rule = {
+    meta: {
+      detail: {
+        name: [
+          {validate: "mandatory"},
+          {validate: /[a-z]/i, message: "must only contain letters"}
+        ],
+        age: [
+          "notMandatory",
+          {validate: "number", integer: true, min: 0, max: 99}
+        ]
+      },
+      id: "mandatory"
+    }
+  };
+
+
+  t.deepEqual(v.validate({meta: {detail: {name: ":-(", age: 100}}}, rule), {
+    meta: {
+      id: ["must not be empty"],
+      detail: {
+        name: ["must only contain letters"],
+        age: ["must be no more than 99"]
+      }
+    }
+  });
+
+  t.deepEqual(v.validate({meta: {detail: {name: "abc", age: 22}}}, rule), {
+    meta: {
+      id: ["must not be empty"]
+    }
+  });
+
+  t.deepEqual(v.validate({meta: {detail: {name: ":-(", age: 100}, id: 2}}, rule), {
+    meta: {
+        detail: {
+        name: ["must only contain letters"],
+        age: ["must be no more than 99"]
+      }
+    }
+  });
+
+  t.deepEqual(v.validate({meta: {detail: {name: "abc", age: 22}, id: 2}}, rule), {});
+
+  t.end();
+});
