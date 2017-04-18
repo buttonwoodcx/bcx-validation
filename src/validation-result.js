@@ -1,12 +1,53 @@
 import _ from 'lodash';
 
+const BASE = '__base__';
+
+function mergeArray(objValue, srcValue) {
+  if (_.isArray(objValue)) {
+    return objValue.concat(srcValue);
+  }
+}
+
+export function mergedErrors(errs1, errs2) {
+  let result = {
+    [BASE]: []
+  };
+
+  function _merge(errs) {
+    if (errs) {
+      if (_.isArray(errs)) {
+        _.mergeWith(result, {[BASE]: errs}, mergeArray);
+      } else if (_.isPlainObject(errs)) {
+        _.mergeWith(result, errs, mergeArray);
+      }
+    }
+  }
+
+  _merge(errs1);
+  _merge(errs2);
+
+  result = _.mapValues(result, v => _.isArray(v) ?
+                                    _(v).compact().map(_.trim).uniq().value() :
+                                    v);
+
+  let cleanResult = {};
+  _.each(result, (v, k) => {
+    if (!_.isEmpty(v)) cleanResult[k] = v;
+  });
+
+  if (_.size(cleanResult) === 1 && cleanResult[BASE]) {
+    // only top level errors
+    return cleanResult[BASE];
+  } else {
+    return cleanResult;
+  }
+};
+
 export default class ValidationResult {
 
   // normalize validation result
   constructor(result) {
     this.isValid = true;
-    this.messages = [];
-    this.break = false; // used in validator-chain to break early
 
     if (_.isUndefined(result) || _.isNull(result)) return;
 
@@ -14,10 +55,13 @@ export default class ValidationResult {
       this.isValid = result;
       if (!this.isValid) {
         // default error message
-        this.addErrorMessage('invalid');
+        this.mergeErrors(['invalid']);
       }
     } else if (_.isString(result)) {
-      this.addErrorMessage(result);
+      if (!_.isEmpty(_.trim(result))) {
+        this.isValid = false;
+        this.mergeErrors([result]);
+      }
     } else if (_.isArray(result)) {
       let finalIsValid = null;
       _.each(result, r => {
@@ -32,9 +76,7 @@ export default class ValidationResult {
           if (finalIsValid !== false) finalIsValid = true;
         } else if (validationResult.isValid === false) {
           finalIsValid = false;
-          _.each(validationResult.messages, m => {
-            this.addErrorMessage(m);
-          });
+          this.mergeErrors(validationResult.errors);
         }
 
         this.isValid = finalIsValid;
@@ -48,35 +90,23 @@ export default class ValidationResult {
         this.isValid = !!result.isValid;
       }
 
-      this.break = !!result.break;
+      if (result.break) this.break = true;
       if (this.isValid !== false) return;
 
-      this.addErrorMessage(result.message);
+      if (result.message) this.mergeErrors([result.message]);
+      else if (result.messages) this.mergeErrors(result.messages);
+      else if (result.errors) this.mergeErrors(result.errors);
 
-      _.each(result.messages, m => {
-        this.addErrorMessage(m);
-      });
-
-      if (_.isEmpty(this.messages)) {
+      if (_.isEmpty(this.errors)) {
         // default error message
-        this.addErrorMessage('invalid');
+        this.mergeErrors(['invalid']);
       }
     } else {
       throw new Error(`Unexpected validation result:${result}`);
     }
   }
 
-  addErrorMessage(message) {
-    if (!_.isString(message)) return;
-
-    const trimed = _.trim(message);
-    if (_.isEmpty(trimed)) return;
-
-    this.isValid = false;
-
-    // avoid duplication
-    if (_.includes(this.messages, trimed)) return;
-    this.messages.push(trimed);
+  mergeErrors(errors) {
+    this.errors = mergedErrors(this.errors, errors);
   }
-
 }

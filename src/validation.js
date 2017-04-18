@@ -144,7 +144,7 @@ class Validation {
         const validator = this.buildValidator(rules);
         const result = validator(localScope);
         if (result.isValid === false) {
-          error[propertyName] = result.messages;
+          error[propertyName] = result.errors;
         }
       } else if (_.isPlainObject(rules)) {
         const nested = rules;

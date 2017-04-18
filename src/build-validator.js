@@ -26,7 +26,7 @@ function standardValidatorWrap(validator, opts = {}) {
     if (forceBreak || overrideMessage) {
       result = new ValidationResult({
         isValid: result.isValid,
-        messages: overrideMessage ? [overrideMessage] : result.messages,
+        errors: overrideMessage ? [overrideMessage] : result.errors,
         break: result.break || forceBreak
       });
     }
