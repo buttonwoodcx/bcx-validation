@@ -15,6 +15,7 @@ test('scopeVariation: creates scope variation', t => {
   t.deepEqual(parent, {c: 3, d: 4}, 'does not touch original parentBindingContext');
 
   t.deepEqual(variation.bindingContext, {a: 'one', b: 2, c: {new: 1}}, 'creates new bindingContext');
+  t.deepEqual(variation.overrideContext.parentOverrideContext.bindingContext, {c: 3, d: 4}, 'keep same parent context');
   t.equal(
     _.get(scope, 'overrideContext.parentOverrideContext.bindingContext'),
     parent,

@@ -1,16 +1,21 @@
-import {createOverrideContext, createSimpleScope} from 'bcx-expression-evaluator';
+import {createOverrideContext} from 'bcx-expression-evaluator';
 import _ from 'lodash';
 
 export default function (scope, variation) {
   if (_.isEmpty(variation)) return scope;
 
   const {bindingContext} = scope;
-  const parentBindingContext = _.get(scope, 'overrideContext.parentOverrideContext.bindingContext');
+  const parentOverrideContext = _.get(scope, 'overrideContext.parentOverrideContext');
 
   const newBindingContext = {
     ...bindingContext,
     ...variation
   };
 
-  return createSimpleScope(newBindingContext, parentBindingContext);
+  const newOverrideContext = createOverrideContext(newBindingContext, parentOverrideContext);
+
+  return {
+    bindingContext: newBindingContext,
+    overrideContext: newOverrideContext
+  };
 }
