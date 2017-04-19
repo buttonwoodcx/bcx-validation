@@ -9,7 +9,7 @@ test('isTrue: validates isTrue', t => {
   t.deepEqual(v.validate({a: true}, rule), {});
   t.deepEqual(v.validate({a: false}, rule), {a: ['must be true']});
 
-  rule = {a: {validate: "isTrue", message: '${$propertyName}:${$value} is not true'}};
+  rule = {a: {validate: "isTrue", message: '${$propertyPath}:${$value} is not true'}};
   t.deepEqual(v.validate({a: true}, rule), {});
   t.deepEqual(v.validate({a: false}, rule), {a: ['a:false is not true']});
 

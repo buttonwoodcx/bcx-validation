@@ -3,7 +3,7 @@ import valueEvaluator from '../src/value-evaluator';
 import {createSimpleScope} from 'bcx-expression-evaluator';
 
 const $value = "abc";
-const $propertyName = "property";
+const $propertyPath = "property";
 const $neighbours = [new Object(), new Object()];
 
 const $model = {
@@ -16,7 +16,7 @@ const $parentModel = new Object();
 const scope = createSimpleScope({
   ... $model,
   $value,
-  $propertyName,
+  $propertyPath,
   $neighbours
 }, $parentModel);
 
@@ -42,14 +42,14 @@ test('valueEvaluator: builds for regex', t => {
 });
 
 test('valueEvaluator: builds for function', t => {
-  function test(value, propertyName, context, neighbours, parentContext) {
+  function test(value, propertyPath, context, neighbours, parentContext) {
     t.equal(value, $value);
-    t.equal(propertyName, $propertyName);
+    t.equal(propertyPath, $propertyPath);
     t.deepEqual(context, {
       property: $value,
       some: 'other',
       $value,
-      $propertyName,
+      $propertyPath,
       $neighbours
     });
 

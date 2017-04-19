@@ -45,8 +45,6 @@ export default function buildValidator (rule, validatorResolve) {
 
   let validator;
 
-  // console.log('buildValidator: ' + JSON.stringify(rule));
-
   if (_.isFunction(rule)) {
     // raw rule in function
     validator = rawValidator(rule);

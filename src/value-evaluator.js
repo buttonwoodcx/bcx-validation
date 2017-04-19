@@ -23,7 +23,7 @@ export default function (input, opts) {
     const func = input;
     // from current context
     const getValue         = parser.parse('$value');
-    const getPropertyName  = parser.parse('$propertyName');
+    const getPath          = parser.parse('$propertyPath');
     const getContext       = parser.parse('$this');
     const getNeighbours    = parser.parse('$neighbours');
     // from parent context
@@ -31,12 +31,12 @@ export default function (input, opts) {
 
     return scope => {
       const value = getValue.evaluate(scope);
-      const propertyName = getPropertyName.evaluate(scope);
+      const propertyPath = getPath.evaluate(scope);
       const context = getContext.evaluate(scope);
       const neighbours = getNeighbours.evaluate(scope);
       const parentContext = getParentContext.evaluate(scope);
 
-      return func(value, propertyName, context, neighbours, parentContext);
+      return func(value, propertyPath, context, neighbours, parentContext);
     };
   }
 

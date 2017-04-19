@@ -1,4 +1,6 @@
 import _ from 'lodash';
+import {createOverrideContext} from 'bcx-expression-evaluator';
+import valueEvaluator from './value-evaluator';
 
 export function isBlank(v) {
   if (_.isNull(v) || _.isUndefined(v) || _.isNaN(v)) return true;
@@ -45,10 +47,47 @@ export const switchTransformer = function (rule) {
   return rules;
 };
 
-export const forEachTransformer = function (rule, buildValidator) {
+export const forEachTester = function (rule) {
+  if (!_.has(rule, 'foreach')) return;
+  if (!_.isEmpty(_.omit(rule, ['foreach', 'key']))) return;
+  return true;
+};
+
+export const forEachTransformer = function (rule, validate) {
+  const foreachRulesMap = _.get(rule, 'foreach');
+  const _key = _.get(rule, 'key', '$index');
+
+  const keyEvaluator = valueEvaluator(_key);
 
   const validator = scope => {
+    let result = {};
+    const length = _.size(scope.bindingContext.$value);
+    _.each(scope.bindingContext.$value, (item, index) => {
+      let neighbours = _.filter(scope.bindingContext.$value, (v, i) => i !== index);
+      let bindingContext = {
+        ...item,
+        $value: item,
+        $neighbours: neighbours,
+        $index: index,
+        $first: index === 0,
+        $last: (index === length - 1),
+        $even: (index % 2 === 0),
+        $odd: (index % 2 === 1)
+      };
 
+      let overrideContext = createOverrideContext(bindingContext, scope.overrideContext);
+      const newScope = {bindingContext, overrideContext};
+      const key = keyEvaluator(newScope);
+      const errors = validate(newScope, foreachRulesMap);
+
+      if (!_.isEmpty(errors)) {
+        result[key] = errors;
+      }
+    });
+
+    if (!_.isEmpty(result)) {
+      return {isValid: false, errors: result};
+    }
   };
 
   validator.readyToUse = true;
@@ -89,7 +128,7 @@ export const standardTransformers = [
 
   // TODO foreach
   // need to create new binding context, put existing context on overrideContext
-
+  [forEachTester, forEachTransformer],
 
   // transform regex
   ["_.isRegExp($this)", rule => ({validate: "isTrue", value: rule})],
@@ -104,6 +143,8 @@ export const standardTransformers = [
   // transform "email"
   ["$this === 'email'", () => ({validate: "email"})],
 
+  // transform "unique"
+  ["$this === 'unique'", () => ({validate: "unique"})],
 ];
 
 export const standardValidators = [
@@ -197,7 +238,9 @@ export const standardValidators = [
   ["email", {validate: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
              message: "not a valid email"}],
 
-  // TODO unique. need to access neighbours
+  // unique. need to access neighbours
+  // option items is evaluated from current scope
+  ["unique", {validate: "notIn", "items.bind": "_.map($neighbours, $propertyPath)", message: "must be unique"}],
 ];
 
 export function config (validation) {

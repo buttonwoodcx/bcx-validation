@@ -23,8 +23,6 @@ class Validation {
   }
 
   resolveValidator(rule) {
-    // console.log('resolveValidator: ' + JSON.stringify(rule));
-
     const found = _.find(this.availableValidators, v => v.test(rule));
     if (!found) return;
 
@@ -53,16 +51,20 @@ class Validation {
       return scope => {
         let variation = {};
         // prefix option name with $ in scope to reduce chance of conflict
-        _.each(options, (v, name) => variation[`$${name}`] = v);
+        _.each(options, (v, name) => {
+          if (_.endsWith(name, '.bind')) {
+            // support binding on option like "maxLength.bind":...
+            const trueName = name.substr(0, name.length - 5);
+            variation[`$${trueName}`] = valueEvaluator(v)(scope);
+          } else {
+            variation[`$${name}`] = v;
+          }
+        });
 
         if (valueEval) {
           variation.$value = valueEval(scope);
         }
 
-        // console.log('');
-        // console.log('eval rule: '+ JSON.stringify(rule));
-        // console.log('with variation ' + JSON.stringify(variation));
-        // console.log('');
         return validator(scopeVariation(scope, variation));
       };
     } else if (transformer) {
@@ -114,7 +116,7 @@ class Validation {
   validate(model, rulesMap, helper = {}) {
     // use ...model to avoid scope variation to pollute model
     // add lodash to helper by default
-    const scope = createSimpleScope({...model}, {_, ...helper});
+    const scope = createSimpleScope({...model}, {help: 'HELP', _, ...helper});
     return this._validate(scope, rulesMap);
   }
 
@@ -124,11 +126,9 @@ class Validation {
     _.each(rulesMap, (rules, propertyName) => {
       const path = inPropertyName ? `${inPropertyName}.${propertyName}` : propertyName;
       const value = valueEvaluator(path)(scope);
-      // console.log('path:'+path);
-      // console.log('value:'+value);
       const localScope = scopeVariation(scope, {
         $value: value,
-        $propertyName: propertyName,
+        $propertyPath: path,
       });
 
       // try if it's a single validation
@@ -154,6 +154,8 @@ class Validation {
         if (!_.isEmpty(nestedErrors)) {
           error[propertyName] = nestedErrors;
         }
+      } else {
+        throw new Error('Unexpected rules: '+JSON.stringify(rules));
       }
 
     });
