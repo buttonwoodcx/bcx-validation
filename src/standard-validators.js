@@ -110,7 +110,7 @@ export const standardTransformers = [
   //
   // note: 'if' is a reserved word in javascript but not in bcx-expression
   // be less surprising but verbose, write "_.isString($this['if'])"
-  ["_.isString(if)", ifTransformer],
+  ["_.isString(if) && !_.isEmpty(_.omit($this, 'if'))", ifTransformer],
 
   // switch
   //
@@ -124,7 +124,7 @@ export const standardTransformers = [
   //
   // note: 'switch' is a reserved word in javascript but not in bcx-expression
   // be less surprising but verbose, write "_.isString($this['switch'])"
-  ["_.isString(switch) && _.isPlainObject(cases)", switchTransformer],
+  ["_.isString(switch) && _.isPlainObject(cases) && _.isEmpty(_.omit($this, 'switch', 'cases'))", switchTransformer],
 
   // TODO foreach
   // need to create new binding context, put existing context on overrideContext

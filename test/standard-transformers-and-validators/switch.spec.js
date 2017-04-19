@@ -51,3 +51,19 @@ test('switch: switch cases after if', t => {
 
   t.end();
 });
+
+test('switch: smart enough to separate validation rule from switch transformer', t => {
+  t.deepEqual(v.validate({meta: {switch: ''}}, {meta: {switch: 'mandatory'}}), {meta: {switch: ["must not be empty"]}});
+  t.deepEqual(v.validate({meta: {switch: '', cases: ''}}, {meta: {switch: 'mandatory', cases: 'mandatory'}}),
+    {meta: {switch: ["must not be empty"], cases: ["must not be empty"]}});
+
+  // not smart enough for this
+  t.notDeepEqual(v.validate({meta: {switch: '', cases: ''}}, {meta: {switch: 'mandatory', cases: {validate: 'mandatory'}}}),
+    {meta: {switch: ["must not be empty"], cases: ["must not be empty"]}});
+
+  // need one hint
+  t.deepEqual(v.validate({meta: {switch: '', cases: ''}}, {meta: {ignore: "notMandatory", switch: 'mandatory', cases: {validate: 'mandatory'}}}),
+    {meta: {switch: ["must not be empty"], cases: ["must not be empty"]}});
+
+  t.end();
+});

@@ -46,3 +46,17 @@ test('if: support group', t => {
   t.deepEqual(v.validate({a: 'NAa', mixCase: true}, rule), {});
   t.end();
 });
+
+test('if: smart enough to separate validation from if transformer', t => {
+  t.deepEqual(v.validate({meta: {if: ''}}, {meta: {if: 'mandatory'}}),
+    {meta: {if: ['must not be empty']}});
+
+  // not smart enough for this
+  t.throws(() => v.validate({meta: {if: '', else: ''}}, {meta: {if: 'mandatory', else: 'mandatory'}}));
+
+  // need to be explicit
+  t.deepEqual(v.validate({meta: {if: '', else: ''}}, {meta: {if: {validate: 'mandatory'}, else: 'mandatory'}}),
+    {meta: {if: ['must not be empty'], else: ['must not be empty']}});
+
+  t.end();
+});
