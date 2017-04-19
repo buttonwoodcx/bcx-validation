@@ -31,6 +31,7 @@ export const ifTransformer = function (rule) {
   return rules;
 };
 
+// TODO: do we need to support switch: a_function?
 export const switchTransformer = function (rule, validate) {
   const _switch = _.get(rule, 'switch');
   const cases = _.get(rule, 'cases');
@@ -71,8 +72,12 @@ export const forEachTester = function (rule) {
 
 export const forEachTransformer = function (rule, validate) {
   const foreachRulesMap = _.get(rule, 'foreach');
-  const _key = _.get(rule, 'key', '$index');
+  let foreachRulesMapFunc;
+  if (_.isFunction(foreachRulesMap)) {
+    foreachRulesMapFunc = valueEvaluator(foreachRulesMap);
+  }
 
+  const _key = _.get(rule, 'key', '$index');
   const keyEvaluator = valueEvaluator(_key);
 
   const validator = scope => {
@@ -92,7 +97,10 @@ export const forEachTransformer = function (rule, validate) {
       let overrideContext = createOverrideContext(bindingContext, scope.overrideContext);
       const newScope = {bindingContext, overrideContext};
       const key = keyEvaluator(newScope);
-      const errors = validate(newScope, foreachRulesMap);
+
+      const errors = validate(newScope, foreachRulesMapFunc ?
+                                        foreachRulesMapFunc(newScope) :
+                                        foreachRulesMap);
 
       if (!_.isEmpty(errors)) {
         result[key] = errors;

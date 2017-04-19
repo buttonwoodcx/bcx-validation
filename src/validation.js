@@ -122,6 +122,7 @@ class Validation {
 
   _validate(scope, rulesMap, inPropertyName) {
     let error = {};
+    if (_.isEmpty(rulesMap)) return error;
 
     // validate the whole model without any nested property validation
     if (this.resolveValidator(rulesMap) ||
