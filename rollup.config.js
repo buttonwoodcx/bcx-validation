@@ -7,8 +7,11 @@ export default {
   format: 'umd',
   moduleName: 'BcxValidator',
   dest: 'dist/index.js',
-  external: [],
-  globals: {},
+  external: ["lodash", "bcx-expression-evaluator"],
+  globals: {
+    "lodash": "_",
+    "bcx-expression-evaluator": "BcxExpressionEvaluator"
+  },
   plugins: [
     resolve(),
     babel({
