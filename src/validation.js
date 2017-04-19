@@ -116,49 +116,64 @@ class Validation {
   validate(model, rulesMap, helper = {}) {
     // use ...model to avoid scope variation to pollute model
     // add lodash to helper by default
-    const scope = createSimpleScope({...model}, {help: 'HELP', _, ...helper});
+    const scope = createSimpleScope({...model, $value: model}, {_, ...helper});
     return this._validate(scope, rulesMap);
   }
 
   _validate(scope, rulesMap, inPropertyName) {
     let error = {};
 
-    _.each(rulesMap, (rules, propertyName) => {
-      const path = inPropertyName ? `${inPropertyName}.${propertyName}` : propertyName;
-      const value = valueEvaluator(path)(scope);
-      const localScope = scopeVariation(scope, {
-        $value: value,
-        $propertyPath: path,
+    // validate the whole model without any nested property validation
+    if (this.resolveValidator(rulesMap) ||
+        _.isString(rulesMap) ||
+        _.isRegExp(rulesMap) ||
+        _.isFunction(rulesMap)) {
+      rulesMap = [rulesMap];
+    }
+
+    if (_.isArray(rulesMap)) {
+      const validator = this.buildValidator(rulesMap);
+      const result = validator(scope);
+      // console.log(' _validate: result: '+JSON.stringify(result, null, 2));
+      if (result.isValid === false) {
+        return result.errors;
+      }
+    } else if (_.isPlainObject(rulesMap)) {
+      _.each(rulesMap, (rules, propertyName) => {
+        const path = inPropertyName ? `${inPropertyName}.${propertyName}` : propertyName;
+        const value = valueEvaluator(path)(scope);
+        const localScope = scopeVariation(scope, {
+          $value: value,
+          $propertyPath: path,
+        });
+
+        // try if it's a single validation
+        // wrap single validation in array
+        if (this.resolveValidator(rules) ||
+            _.isString(rules) ||
+            _.isRegExp(rules) ||
+            _.isFunction(rules)) {
+          rules = [rules];
+        }
+
+        if (_.isArray(rules)) {
+          const validator = this.buildValidator(rules);
+          const result = validator(localScope);
+          if (result.isValid === false) {
+            error[propertyName] = result.errors;
+          }
+        } else if (_.isPlainObject(rules)) {
+          const nestedErrors = this._validate(scope, rules, path);
+
+          if (!_.isEmpty(nestedErrors)) {
+            error[propertyName] = nestedErrors;
+          }
+        } else {
+          throw new Error('Unexpected rules: '+JSON.stringify(rules));
+        }
+
       });
-
-      // try if it's a single validation
-      const singleValidation = this.resolveValidator(rules);
-
-      // wrap single validation in array
-      if (singleValidation ||
-          _.isString(rules) ||
-          _.isRegExp(rules) ||
-          _.isFunction(rules)) {
-        rules = [rules];
-      }
-
-      if (_.isArray(rules)) {
-        const validator = this.buildValidator(rules);
-        const result = validator(localScope);
-        if (result.isValid === false) {
-          error[propertyName] = result.errors;
-        }
-      } else if (_.isPlainObject(rules)) {
-        const nestedErrors = this._validate(scope, rules, path);
-
-        if (!_.isEmpty(nestedErrors)) {
-          error[propertyName] = nestedErrors;
-        }
-      } else {
-        throw new Error('Unexpected rules: '+JSON.stringify(rules));
-      }
-
-    });
+    }
 
     return error;
   }

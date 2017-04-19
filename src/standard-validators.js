@@ -31,20 +31,36 @@ export const ifTransformer = function (rule) {
   return rules;
 };
 
-export const switchTransformer = function (rule) {
+export const switchTransformer = function (rule, validate) {
   const _switch = _.get(rule, 'switch');
   const cases = _.get(rule, 'cases');
 
-  let rules = [];
+  const validator = scope => {
+    // make a guess whether user try to use nested validation or plain validation
+    let nestedPath;
+    if (_.isPlainObject(valueEvaluator('$this["$value"]')(scope))) {
+      nestedPath = valueEvaluator('$this["$propertyPath"]')(scope);
+      // console.log(' nestedPath:'+nestedPath);
+    }
 
-  _.each(cases, (subRules, _case) => {
-    rules.push({
-      if: `(${_switch}) == ${JSON.stringify(_case)}`,
-      group: _.isArray(subRules) ? subRules : [subRules]
-    });
-  });
+    const switchEvaluator = valueEvaluator(nestedPath ? `${nestedPath}.${_switch}` : _switch);
 
-  return rules;
+    const _case = switchEvaluator(scope);
+    const matchCase = cases[_case];
+    // console.log('  case: '+_case);
+    // console.log('  matchCase: '+JSON.stringify(matchCase));
+    // console.log('  scope: ' + JSON.stringify(scope, null, 2));
+    if (!matchCase) return;
+
+    const errors = validate(scope, matchCase, nestedPath);
+    if (!_.isEmpty(errors)) {
+      // console.log('errors:'+JSON.stringify(errors));
+      return {isValid: false, errors: errors};
+    }
+  };
+
+  validator.readyToUse = true;
+  return validator;
 };
 
 export const forEachTester = function (rule) {
@@ -71,8 +87,6 @@ export const forEachTransformer = function (rule, validate) {
         $index: index,
         $first: index === 0,
         $last: (index === length - 1),
-        $even: (index % 2 === 0),
-        $odd: (index % 2 === 1)
       };
 
       let overrideContext = createOverrideContext(bindingContext, scope.overrideContext);

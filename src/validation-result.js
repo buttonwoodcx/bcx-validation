@@ -102,7 +102,7 @@ export default class ValidationResult {
         this.mergeErrors(['invalid']);
       }
     } else {
-      throw new Error(`Unexpected validation result:${result}`);
+      throw new Error(`Unexpected validation result (type=${typeof result}, ${JSON.stringify(result)})`);
     }
   }
 

@@ -27,6 +27,29 @@ test('switch: switch cases', t => {
   t.end();
 });
 
+test('switch: switch cases on nested validation', t => {
+  let rule = {
+    meta: {
+      "switch": "type",
+      "cases": {
+        "string": {value: {validate: "string", minLength: 4}},
+        "number": {value: ["notMandatory", {validate: "number", min: 10}]}
+      }
+    }
+  };
+
+  t.deepEqual(v.validate({meta: {value: 'on', type: 'string'}}, rule), {
+    meta: {value: ["must has at least 4 characters"]}
+  });
+
+  t.deepEqual(v.validate({meta: {value: 5, type: 'number'}}, rule), {
+    meta: {value: ["must be at least 10"]}
+  });
+
+  t.deepEqual(v.validate({meta: {value: null, type: 'number'}}, rule), {});
+  t.end();
+});
+
 test('switch: switch cases after if', t => {
   let rule = {
     value: {
