@@ -85,14 +85,15 @@ export const forEachTransformer = function (rule, validate) {
     const length = _.size(scope[0].$value);
     _.each(scope[0].$value, (item, index) => {
       let neighbours = _.filter(scope[0].$value, (v, i) => i !== index);
-      let bindingContext = {
-        ...item,
+      let bindingContext = _.isObjectLike(item) ? {...item} : {};
+      _.merge(bindingContext, {
         $value: item,
+        $propertyPath: '', // initial propertyPath
         $neighbours: neighbours,
         $index: index,
         $first: index === 0,
         $last: (index === length - 1),
-      };
+      });
 
       const newScope = createScope(bindingContext, ...scope);
       const key = keyEvaluator(newScope);
@@ -159,6 +160,12 @@ export const standardTransformers = [
   // transform regex
   ["_.isRegExp($this)", rule => ({validate: "isTrue", value: rule})],
   ["_.isRegExp(validate)", rule => ({validate: "isTrue", value: rule.validate})],
+
+  // transform "isBlank"
+  ["$this === 'isBlank'", () => ({validate: "isBlank"})],
+
+  // transform "notBlank"
+  ["$this === 'notBlank'", () => ({validate: "notBlank"})],
 
   // transform "mandatory"
   ["$this === 'mandatory'", () => ({validate: "mandatory"})],
@@ -266,7 +273,8 @@ export const standardValidators = [
 
   // unique. need to access neighbours
   // option items is evaluated from current scope
-  ["unique", {validate: "notIn", "items.bind": "_.map($neighbours, $propertyPath)", message: "must be unique"}],
+  // neighbours could be simple value (when no propertyPath)
+  ["unique", {validate: "notIn", "items.bind": "$propertyPath ? _.map($neighbours, $propertyPath) : $neighbours", message: "must be unique"}],
 ];
 
 export function config (validation) {

@@ -215,3 +215,25 @@ test('foreach: validates array with a function return rulesMap. key can be funct
 
   t.end();
 });
+
+test('foreach: validates simple array', t => {
+  let rule = {
+    tags: {
+      foreach: ["notBlank", "unique"]
+    }
+  };
+
+  const obj = {
+    tags: ["foo", "  ", "bar", "bar", "lorem"]
+  };
+
+  t.deepEqual(v.validate(obj, rule), {
+    tags: {
+      "1": ["must not be blank"],
+      "2": ["must be unique"],
+      "3": ["must be unique"]
+    }
+  });
+
+  t.end();
+});

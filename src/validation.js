@@ -120,12 +120,9 @@ class Validation {
   validate(model, rulesMap, helper = {}) {
     // use ...model to avoid scope variation to pollute model
     // add lodash to helper by default
-    let bindingContext;
-    if (_.isObjectLike(model)) {
-      bindingContext = {...model, $value: model};
-    } else {
-      bindingContext = {$value: model};
-    }
+    let bindingContext = _.isObjectLike(model) ? {...model} : {};
+    _.merge(bindingContext, {$value: model, $propertyPath: ''});
+
     const scope = createScope(bindingContext, {_, ...helper});
     return this._validate(scope, rulesMap);
   }
@@ -145,7 +142,6 @@ class Validation {
     if (_.isArray(rulesMap)) {
       const validator = this.buildValidator(rulesMap);
       const result = validator(scope);
-      // console.log(' _validate: result: '+JSON.stringify(result, null, 2));
       if (result.isValid === false) {
         return result.errors;
       }
