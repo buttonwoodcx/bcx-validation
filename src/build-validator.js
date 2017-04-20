@@ -61,7 +61,7 @@ export default function buildValidator (rule, validatorResolve) {
       // wrap single expression/regex in isTrue
       validator = validatorResolve({validate: "isTrue", value: rule});
     }
-  } else if (_.isPlainObject(rule)) {
+  } else if (_.isObjectLike(rule)) {
     const rawRule = _.omit(rule, ['message',
                                   'stopValidationChainIfPass',
                                   'stopValidationChainIfFail']);

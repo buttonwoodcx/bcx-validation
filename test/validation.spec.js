@@ -8,7 +8,7 @@ test('Validate: validates whole object', t => {
   let rule = {
     name: [
       {validate: "mandatory"},
-      {validate: /[a-z]/i, message: "must only contain letters"}
+      {validate: /[a-z]/i, message: "must contain letters"}
     ],
     age: [
       "notMandatory",
@@ -18,10 +18,10 @@ test('Validate: validates whole object', t => {
 
   t.deepEqual(v.validate({name: "hello", age: 20}), {});
   t.deepEqual(v.validate({name: "", age: null}, rule), {name: ["must not be empty"]});
-  t.deepEqual(v.validate({name: ":-(", age: null}, rule), {name: ["must only contain letters"]});
+  t.deepEqual(v.validate({name: ":-(", age: null}, rule), {name: ["must contain letters"]});
 
   t.deepEqual(v.validate({name: ":-(", age: "20"}, rule), {
-    name: ["must only contain letters"],
+    name: ["must contain letters"],
     age: ["must be a number"]
   });
 
@@ -56,7 +56,7 @@ test('Validate: validates nested object', t => {
     detail: {
       name: [
         {validate: "mandatory"},
-        {validate: /[a-z]/i, message: "must only contain letters"}
+        {validate: /[a-z]/i, message: "must contain letters"}
       ],
       age: [
         "notMandatory",
@@ -91,7 +91,7 @@ test('Validate: validates deep nested object', t => {
       detail: {
         name: [
           {validate: "mandatory"},
-          {validate: /[a-z]/i, message: "must only contain letters"}
+          {validate: /[a-z]/i, message: "must contain letters"}
         ],
         age: [
           "notMandatory",
@@ -107,7 +107,7 @@ test('Validate: validates deep nested object', t => {
     meta: {
       id: ["must not be empty"],
       detail: {
-        name: ["must only contain letters"],
+        name: ["must contain letters"],
         age: ["must be no more than 99"]
       }
     }
@@ -118,7 +118,7 @@ test('Validate: validates deep nested object', t => {
     meta: {
       id: ["must not be empty"],
       detail: {
-        name: ["must only contain letters"],
+        name: ["must contain letters"],
         age: ["must be no more than 99"]
       }
     }
@@ -133,13 +133,35 @@ test('Validate: validates deep nested object', t => {
   t.deepEqual(v.validate({meta: {detail: {name: ":-(", age: 100}, id: 2}}, rule), {
     meta: {
         detail: {
-        name: ["must only contain letters"],
+        name: ["must contain letters"],
         age: ["must be no more than 99"]
       }
     }
   });
 
   t.deepEqual(v.validate({meta: {detail: {name: "abc", age: 22}, id: 2}}, rule), {});
+
+  t.end();
+});
+
+
+test('Validate: validates instance of constructor func', t => {
+  function Model(a, b) {
+    this.a = a;
+    this.b = b;
+  }
+
+  let rule = {
+    a: 'mandatory',
+    b: {validate: /[a-z]/i, message: "must contain letters"}
+  };
+
+  let model = new Model('', '12');
+
+  t.deepEqual(v.validate(model, rule), {
+    a: ['must not be empty'],
+    b: ['must contain letters']
+  });
 
   t.end();
 });

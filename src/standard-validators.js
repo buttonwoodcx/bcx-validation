@@ -39,7 +39,7 @@ export const switchTransformer = function (rule, validate) {
   const validator = scope => {
     // make a guess whether user try to use nested validation or plain validation
     let nestedPath;
-    if (_.isPlainObject(valueEvaluator('$this["$value"]')(scope))) {
+    if (_.isObjectLike(valueEvaluator('$this["$value"]')(scope))) {
       nestedPath = valueEvaluator('$this["$propertyPath"]')(scope);
       // console.log(' nestedPath:'+nestedPath);
     }
@@ -145,7 +145,7 @@ export const standardTransformers = [
   //
   // note: 'switch' is a reserved word in javascript but not in bcx-expression
   // be less surprising but verbose, write "_.isString($this['switch'])"
-  ["_.isString(switch) && _.isPlainObject(cases) && _.isEmpty(_.omit($this, 'switch', 'cases'))", switchTransformer],
+  ["_.isString(switch) && _.isObjectLike(cases) && _.isEmpty(_.omit($this, 'switch', 'cases'))", switchTransformer],
 
   // foreach
   //

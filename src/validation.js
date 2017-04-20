@@ -121,7 +121,7 @@ class Validation {
     // use ...model to avoid scope variation to pollute model
     // add lodash to helper by default
     let bindingContext;
-    if (_.isPlainObject(model)) {
+    if (_.isObjectLike(model)) {
       bindingContext = {...model, $value: model};
     } else {
       bindingContext = {$value: model};
@@ -149,7 +149,7 @@ class Validation {
       if (result.isValid === false) {
         return result.errors;
       }
-    } else if (_.isPlainObject(rulesMap)) {
+    } else if (_.isObjectLike(rulesMap)) {
       _.each(rulesMap, (rules, propertyName) => {
         const path = inPropertyName ? `${inPropertyName}.${propertyName}` : propertyName;
         const value = valueEvaluator(path)(scope);
@@ -173,7 +173,7 @@ class Validation {
           if (result.isValid === false) {
             error[propertyName] = result.errors;
           }
-        } else if (_.isPlainObject(rules)) {
+        } else if (_.isObjectLike(rules)) {
           const nestedErrors = this._validate(scope, rules, path);
 
           if (!_.isEmpty(nestedErrors)) {

@@ -17,7 +17,7 @@ export function mergedErrors(errs1, errs2) {
     if (errs) {
       if (_.isArray(errs)) {
         _.mergeWith(result, {[BASE]: errs}, mergeArray);
-      } else if (_.isPlainObject(errs)) {
+      } else if (_.isObjectLike(errs)) {
         _.mergeWith(result, errs, mergeArray);
       }
     }
