@@ -1,5 +1,5 @@
 import buildValidator from './build-validator';
-import {evaluate, createOverrideContext, createSimpleScope} from 'bcx-expression-evaluator';
+import {evaluate, createScope} from 'bcx-expression-evaluator';
 import valueEvaluator from './value-evaluator';
 import scopeVariation from './scope-variation';
 import {config as configStandardValidators} from './standard-validators';
@@ -116,7 +116,13 @@ class Validation {
   validate(model, rulesMap, helper = {}) {
     // use ...model to avoid scope variation to pollute model
     // add lodash to helper by default
-    const scope = createSimpleScope({...model, $value: model}, {_, ...helper});
+    let bindingContext;
+    if (_.isPlainObject(model)) {
+      bindingContext = {...model, $value: model};
+    } else {
+      bindingContext = {$value: model};
+    }
+    const scope = createScope(bindingContext, {_, ...helper});
     return this._validate(scope, rulesMap);
   }
 

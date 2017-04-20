@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {createOverrideContext} from 'bcx-expression-evaluator';
+import {createScope} from 'bcx-expression-evaluator';
 import valueEvaluator from './value-evaluator';
 
 export function isBlank(v) {
@@ -82,9 +82,9 @@ export const forEachTransformer = function (rule, validate) {
 
   const validator = scope => {
     let result = {};
-    const length = _.size(scope.bindingContext.$value);
-    _.each(scope.bindingContext.$value, (item, index) => {
-      let neighbours = _.filter(scope.bindingContext.$value, (v, i) => i !== index);
+    const length = _.size(scope[0].$value);
+    _.each(scope[0].$value, (item, index) => {
+      let neighbours = _.filter(scope[0].$value, (v, i) => i !== index);
       let bindingContext = {
         ...item,
         $value: item,
@@ -94,8 +94,7 @@ export const forEachTransformer = function (rule, validate) {
         $last: (index === length - 1),
       };
 
-      let overrideContext = createOverrideContext(bindingContext, scope.overrideContext);
-      const newScope = {bindingContext, overrideContext};
+      const newScope = createScope(bindingContext, ...scope);
       const key = keyEvaluator(newScope);
 
       const errors = validate(newScope, foreachRulesMapFunc ?
@@ -148,8 +147,13 @@ export const standardTransformers = [
   // be less surprising but verbose, write "_.isString($this['switch'])"
   ["_.isString(switch) && _.isPlainObject(cases) && _.isEmpty(_.omit($this, 'switch', 'cases'))", switchTransformer],
 
-  // TODO foreach
-  // need to create new binding context, put existing context on overrideContext
+  // foreach
+  //
+  // {
+  //   foreach: ...rules,
+  //   key: optional key expression or function
+  // }
+  //
   [forEachTester, forEachTransformer],
 
   // transform regex

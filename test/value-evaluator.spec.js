@@ -1,6 +1,6 @@
 import test from 'tape';
 import valueEvaluator from '../src/value-evaluator';
-import {createSimpleScope} from 'bcx-expression-evaluator';
+import {createScope} from 'bcx-expression-evaluator';
 
 const $value = "abc";
 const $propertyPath = "property";
@@ -13,7 +13,7 @@ const $model = {
 
 const $parentModel = new Object();
 
-const scope = createSimpleScope({
+const scope = createScope({
   ... $model,
   $value,
   $propertyPath,
