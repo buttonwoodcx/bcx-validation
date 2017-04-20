@@ -14,7 +14,7 @@ test('string: tests sring', t => {
 test('string: tests minLength, maxLength', t => {
   let rule = {a: {validate: "string", minLength: 4, maxLength: 8}};
   t.deepEqual(v.validate({a: 0}, rule), {a: ["must be a string"]});
-  t.deepEqual(v.validate({a: '0'}, rule), {a: ["must has at least 4 characters"]});
+  t.deepEqual(v.validate({a: '0'}, rule), {a: ["must have at least 4 characters"]});
   t.deepEqual(v.validate({a: '0234'}, rule), {});
   t.deepEqual(v.validate({a: '02345678'}, rule), {});
   t.deepEqual(v.validate({a: '023456789'}, rule), {a: ["must be no more than 8 characters"]});

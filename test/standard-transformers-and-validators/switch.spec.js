@@ -16,7 +16,7 @@ test('switch: switch cases', t => {
   };
 
   t.deepEqual(v.validate({value: 'on', type: 'string'}, rule), {
-    value: ["must has at least 4 characters"]
+    value: ["must have at least 4 characters"]
   });
 
   t.deepEqual(v.validate({value: 5, type: 'number'}, rule), {
@@ -39,7 +39,7 @@ test('switch: switch cases on nested validation', t => {
   };
 
   t.deepEqual(v.validate({meta: {value: 'on', type: 'string'}}, rule), {
-    meta: {value: ["must has at least 4 characters"]}
+    meta: {value: ["must have at least 4 characters"]}
   });
 
   t.deepEqual(v.validate({meta: {value: 5, type: 'number'}}, rule), {
@@ -64,7 +64,7 @@ test('switch: switch cases after if', t => {
 
   t.deepEqual(v.validate({value: 'on', type: 'string', enforce: false}, rule), {});
   t.deepEqual(v.validate({value: 'on', type: 'string', enforce: true}, rule), {
-    value: ["must has at least 4 characters"]
+    value: ["must have at least 4 characters"]
   });
 
   t.deepEqual(v.validate({value: 5, type: 'number', enforce: false}, rule), {});

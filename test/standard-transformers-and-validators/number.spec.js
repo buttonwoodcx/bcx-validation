@@ -94,8 +94,8 @@ test('number: tests odd', t => {
 });
 
 test('number: overrides value', t => {
-  let rule = {a: {validate: "number", value: "_.size($value)", min: 2, message: "must has at least 2 items"}};
-  t.deepEqual(v.validate({a: []}, rule), {a: ["must has at least 2 items"]});
+  let rule = {a: {validate: "number", value: "_.size($value)", min: 2, message: "must have at least 2 items"}};
+  t.deepEqual(v.validate({a: []}, rule), {a: ["must have at least 2 items"]});
   t.deepEqual(v.validate({a: [1,2]}, rule), {});
   t.end();
 });

@@ -7,7 +7,7 @@ const v = new Validation();
 // pass minLength, maxLength to sub validator:"string"
 test('password: tests minLength, maxLength', t => {
   let rule = {a: {validate: "password", minLength: 4, maxLength: 8}};
-  t.deepEqual(v.validate({a: '02'}, rule), {a: ["must has at least 4 characters"]});
+  t.deepEqual(v.validate({a: '02'}, rule), {a: ["must have at least 4 characters"]});
   t.deepEqual(v.validate({a: '12345'}, rule), {});
   t.deepEqual(v.validate({a: '123456789'}, rule), {a: ["must be no more than 8 characters"]});
   t.end();
@@ -46,7 +46,7 @@ test('password: tests specialChar', t => {
 test('password: tests all', t => {
   let rule = {a: {validate: "password", minLength: 4, maxLength: 8, alphabet: true, mixCase: true, digit: true, specialChar: true}};
   t.deepEqual(v.validate({a: '02'}, rule), {a: [
-    'must has at least 4 characters',
+    'must have at least 4 characters',
     'must contain alphabet letter',
     'must contain both lower case and upper case letters',
     'must contain special character (like !@$%)'

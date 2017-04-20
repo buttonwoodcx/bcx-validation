@@ -227,7 +227,7 @@ export const standardValidators = [
   // {validate: 'string', minLength: 4, maxLength: 8}
   ["string", [
     {validate: "isTrue", value: "_.isString($value)", message: "must be a string", stopValidationChainIfFail: true},
-    {if: "$minLength", validate: "isTrue", value: "_.size($value) >= $minLength", message: "must has at least ${$minLength} characters"},
+    {if: "$minLength", validate: "isTrue", value: "_.size($value) >= $minLength", message: "must have at least ${$minLength} characters"},
     {if: "$maxLength", validate: "isTrue", value: "_.size($value) <= $maxLength", message: "must be no more than ${$maxLength} characters"}
   ]],
 
