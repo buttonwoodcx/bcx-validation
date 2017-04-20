@@ -113,6 +113,17 @@ test('Validate: validates deep nested object', t => {
     }
   });
 
+  // generateValidator builds a func
+  t.deepEqual(v.generateValidator(rule)({meta: {detail: {name: ":-(", age: 100}}}), {
+    meta: {
+      id: ["must not be empty"],
+      detail: {
+        name: ["must only contain letters"],
+        age: ["must be no more than 99"]
+      }
+    }
+  });
+
   t.deepEqual(v.validate({meta: {detail: {name: "abc", age: 22}}}, rule), {
     meta: {
       id: ["must not be empty"]

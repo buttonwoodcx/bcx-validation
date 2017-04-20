@@ -113,6 +113,10 @@ class Validation {
     });
   }
 
+  generateValidator(rulesMap, helper) {
+    return model => this.validate(model, rulesMap, helper);
+  }
+
   validate(model, rulesMap, helper = {}) {
     // use ...model to avoid scope variation to pollute model
     // add lodash to helper by default
