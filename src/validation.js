@@ -171,7 +171,12 @@ class Validation {
         }
 
         if (_.isArray(rules)) {
-          const validator = this.buildValidator(rules);
+          let validator;
+          try {
+            validator = this.buildValidator(rules);
+          } catch (e) {
+            throw new Error(`[when validating ${path}] ${e.message}`);
+          }
           const result = validator(localScope);
           if (result.isValid === false) {
             error[propertyName] = result.errors;

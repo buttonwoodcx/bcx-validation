@@ -71,7 +71,7 @@ export default function buildValidator (rule, validatorResolve) {
   }
 
   if (!_.isFunction(validator)) {
-    throw new Error('Unsupported rule: ' + JSON.stringify(rule));
+    throw new Error(`Unsupported rule[type=${typeof rule}]: ${JSON.stringify(rule)}`);
   }
 
   return standardValidatorWrap(validator, {message,
