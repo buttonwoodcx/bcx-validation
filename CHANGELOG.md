@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4 - 21/Apr/2017
+
+  * better use of aurelia binding scope
+  * support foreach on arry with simple value like ["a", "b"]
+
 ## 0.1.3 - 20/Apr/2017
 
   * fixed an issue on validating instance created by constructor
