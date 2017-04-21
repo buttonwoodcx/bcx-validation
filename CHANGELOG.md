@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.6 - 21/Apr/2017
+
+  * add feature for override message to wrap existing errors.
+
 ## 0.1.5 - 21/Apr/2017
 
   * add api addHelper to add default helper
