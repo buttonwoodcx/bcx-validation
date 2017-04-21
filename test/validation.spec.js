@@ -165,3 +165,9 @@ test('Validate: validates instance of constructor func', t => {
 
   t.end();
 });
+
+test('Validate: validates simple value', t => {
+  let rules = {validate: "number", min: 5};
+  t.deepEqual(v.validate(3, rules), ["must be at least 5"]);
+  t.end();
+});
