@@ -1,4 +1,3 @@
-import {createScope} from 'bcx-expression-evaluator';
 import _ from 'lodash';
 
 export function modifiedOverrideContext(overrideContext, variation) {
