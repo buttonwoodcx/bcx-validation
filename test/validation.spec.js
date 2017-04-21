@@ -172,6 +172,12 @@ test('Validate: validates simple value', t => {
   t.end();
 });
 
+test('Validate: wraps errors', t => {
+  let rules = {validate: "number", min: 5, message: "${_.join($errors, ', ')} to be fit in"};
+  t.deepEqual(v.validate(3, rules), ["must be at least 5 to be fit in"]);
+  t.end();
+});
+
 test('Validate: can add default helper', t => {
   v.addHelper('sum', (a, b) => a + b);
   let rules = {

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import valueEvaluator from './value-evaluator';
 import validatorChain from './validator-chain';
 import ValidationResult from './validation-result';
+import scopeVariation from './scope-variation';
 
 const rawValidator = valueEvaluator;
 
@@ -20,7 +21,7 @@ function standardValidatorWrap(validator, opts = {}) {
                     (result.isValid === false && stopValidationChainIfFail);
 
     const overrideMessage = (!result.isValid && messageEvaluator) ?
-                            messageEvaluator(scope) :
+                            messageEvaluator(scopeVariation(scope, {$errors: result.errors})) :
                             null;
 
     if (forceBreak || overrideMessage) {
