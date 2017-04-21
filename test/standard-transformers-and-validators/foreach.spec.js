@@ -35,6 +35,74 @@ test('foreach: validates array', t => {
   t.end();
 });
 
+test('foreach: can access parent context', t => {
+  let rule = {
+    customers: {
+      foreach: {
+        email: "email",
+        name: ["mandatory", "unique"],
+        age: ["notMandatory", {validate: 'number', "min.bind": "ageLimit"}]
+      }
+    }
+  };
+
+  const obj = {
+    ageLimit: 21,
+    customers: [
+      {name: 'Arm', email: 'arm@test.com'},
+      {name: 'Bob', email: 'bob@test.com'},
+      {name: 'Bob', email: 'bob', age: 15},
+      {name: '', age: 18}
+    ]
+  };
+
+  t.deepEqual(v.validate(obj, rule), {
+    customers: {
+      "1": {name: ["must be unique"]},
+      "2": {name: ["must be unique"], email:["not a valid email"], age: ["must be at least 21"]},
+      "3": {name: ["must not be empty"], email:["not a valid email"], age: ["must be at least 21"]}
+    }
+  });
+
+  t.end();
+});
+
+test('foreach: can access parent context explictly', t => {
+  let rule = {
+    customers: {
+      foreach: {
+        email: "email",
+        name: ["mandatory", "unique"],
+        age: ["notMandatory", {validate: 'number',
+                               "min.bind": "ageLimit",
+                               message: "${$parent.name} must be at least ${ageLimit} years old"}]
+      }
+    }
+  };
+
+  const obj = {
+    name: 'driver group',
+    ageLimit: 21,
+    customers: [
+      {name: 'Arm', email: 'arm@test.com'},
+      {name: 'Bob', email: 'bob@test.com'},
+      {name: 'Bob', email: 'bob', age: 15},
+      {name: '', age: 18}
+    ]
+  };
+
+  t.deepEqual(v.validate(obj, rule), {
+    customers: {
+      "1": {name: ["must be unique"]},
+      "2": {name: ["must be unique"], email:["not a valid email"], age: ["driver group must be at least 21 years old"]},
+      "3": {name: ["must not be empty"], email:["not a valid email"], age: ["driver group must be at least 21 years old"]}
+    }
+  });
+
+  t.end();
+});
+
+
 test('foreach: validates array with customized key', t => {
   let rule = {
     customers: {
