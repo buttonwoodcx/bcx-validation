@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5 - 21/Apr/2017
+
+  * add api addHelper to add default helper
+
 ## 0.1.4 - 21/Apr/2017
 
   * better use of aurelia binding scope

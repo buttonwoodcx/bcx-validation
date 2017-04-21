@@ -15,7 +15,10 @@ class Validation {
     this.buildValidator = r => buildValidator(r, this.resolveValidator);
     this._validate = this._validate.bind(this);
     this.availableValidators = [];
+    this.standardHelpers = {};
     this.withStandardValidators();
+    // add lodash to helper by default
+    this.addHelper('_', _);
   }
 
   withStandardValidators() {
@@ -113,13 +116,18 @@ class Validation {
     });
   }
 
+  addHelper(name, helper) {
+    if (_.isString(name) && !_.isEmpty(name)) {
+      this.standardHelpers[name] = helper;
+    }
+  }
+
   generateValidator(rulesMap, helper) {
     return model => this.validate(model, rulesMap, helper);
   }
 
   validate(model, rulesMap, helper = {}) {
-    // add lodash to helper by default
-    let scope = createSimpleScope(model, {_, ...helper});
+    let scope = createSimpleScope(model, {...this.standardHelpers, ...helper});
     // initial $value and $propertyPath
     _.merge(scope.overrideContext, {$value: model, $propertyPath: ''});
 
