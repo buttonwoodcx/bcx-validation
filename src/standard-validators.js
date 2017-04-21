@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {createScope} from 'bcx-expression-evaluator';
+import {createSimpleScope, createOverrideContext} from 'bcx-expression-evaluator';
 import valueEvaluator from './value-evaluator';
 
 export function isBlank(v) {
@@ -39,8 +39,8 @@ export const switchTransformer = function (rule, validate) {
   const validator = scope => {
     // make a guess whether user try to use nested validation or plain validation
     let nestedPath;
-    if (_.isObjectLike(valueEvaluator('$this["$value"]')(scope))) {
-      nestedPath = valueEvaluator('$this["$propertyPath"]')(scope);
+    if (_.isObjectLike(valueEvaluator('$value')(scope))) {
+      nestedPath = valueEvaluator('$propertyPath')(scope);
       // console.log(' nestedPath:'+nestedPath);
     }
 
@@ -82,11 +82,15 @@ export const forEachTransformer = function (rule, validate) {
 
   const validator = scope => {
     let result = {};
-    const length = _.size(scope[0].$value);
-    _.each(scope[0].$value, (item, index) => {
-      let neighbours = _.filter(scope[0].$value, (v, i) => i !== index);
-      let bindingContext = _.isObjectLike(item) ? {...item} : {};
-      _.merge(bindingContext, {
+    const enumerable = valueEvaluator('$value')(scope);
+    const length = _.size(enumerable);
+    _.each(enumerable, (item, index) => {
+      const {overrideContext} = scope;
+      let newOverrideContext = createOverrideContext(item, overrideContext);
+
+      let neighbours = _.filter(enumerable, (v, i) => i !== index);
+
+      _.merge(newOverrideContext, {
         $value: item,
         $propertyPath: '', // initial propertyPath
         $neighbours: neighbours,
@@ -95,9 +99,12 @@ export const forEachTransformer = function (rule, validate) {
         $last: (index === length - 1),
       });
 
-      const newScope = createScope(bindingContext, ...scope);
-      const key = keyEvaluator(newScope);
+      const newScope = {
+        bindingContext: item,
+        overrideContext: newOverrideContext
+      };
 
+      const key = keyEvaluator(newScope);
       const errors = validate(newScope, foreachRulesMapFunc ?
                                         foreachRulesMapFunc(newScope) :
                                         foreachRulesMap);

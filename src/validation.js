@@ -1,5 +1,5 @@
 import buildValidator from './build-validator';
-import {evaluate, createScope} from 'bcx-expression-evaluator';
+import {evaluate, createSimpleScope} from 'bcx-expression-evaluator';
 import valueEvaluator from './value-evaluator';
 import scopeVariation from './scope-variation';
 import {config as configStandardValidators} from './standard-validators';
@@ -118,12 +118,11 @@ class Validation {
   }
 
   validate(model, rulesMap, helper = {}) {
-    // use ...model to avoid scope variation to pollute model
     // add lodash to helper by default
-    let bindingContext = _.isObjectLike(model) ? {...model} : {};
-    _.merge(bindingContext, {$value: model, $propertyPath: ''});
+    let scope = createSimpleScope(model, {_, ...helper});
+    // initial $value and $propertyPath
+    _.merge(scope.overrideContext, {$value: model, $propertyPath: ''});
 
-    const scope = createScope(bindingContext, {_, ...helper});
     return this._validate(scope, rulesMap);
   }
 

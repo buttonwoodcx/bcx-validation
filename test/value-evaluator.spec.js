@@ -1,6 +1,7 @@
 import test from 'tape';
 import valueEvaluator from '../src/value-evaluator';
-import {createScope} from 'bcx-expression-evaluator';
+import {createSimpleScope} from 'bcx-expression-evaluator';
+import _ from 'lodash';
 
 const $value = "abc";
 const $propertyPath = "property";
@@ -13,13 +14,12 @@ const $model = {
 
 const $parentModel = new Object();
 
-const scope = createScope({
-  ... $model,
+let scope = createSimpleScope($model, $parentModel);
+_.merge(scope.overrideContext, {
   $value,
   $propertyPath,
   $neighbours
-}, $parentModel);
-
+});
 
 test('valueEvaluator: builds for string', t => {
   t.throws(() => valueEvaluator(''), 'rejects empty expression');
@@ -45,15 +45,9 @@ test('valueEvaluator: builds for function', t => {
   function test(value, propertyPath, context, neighbours, parentContext) {
     t.equal(value, $value);
     t.equal(propertyPath, $propertyPath);
-    t.deepEqual(context, {
-      property: $value,
-      some: 'other',
-      $value,
-      $propertyPath,
-      $neighbours
-    });
+    t.deepEqual(context, $model);
 
-    t.equal(neighbours, $neighbours);
+    t.deepEqual(neighbours, $neighbours);
     t.equal(parentContext, $parentModel);
     t.end();
   }

@@ -2,7 +2,7 @@ import test from 'tape';
 import _ from 'lodash';
 import valueEvaluator from '../src/value-evaluator';
 import buildValidator from '../src/build-validator';
-import {createScope} from 'bcx-expression-evaluator';
+import {createSimpleScope} from 'bcx-expression-evaluator';
 
 function validatorResolveDummy(rule) {
   if (rule && rule.validate === 'isTrue') {
@@ -26,9 +26,9 @@ test('buildValidator: builds on raw func', t => {
   };
 
   const validator = buildValidator(test, validatorResolveDummy);
-  t.deepEqual(validator(createScope({$value: 'pass'}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 'pass'}, {})),
               {isValid: true});
-  t.deepEqual(validator(createScope({$value: 'fail'}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 'fail'}, {})),
               {isValid: false, errors: ['lorem']});
   t.end();
 });
@@ -41,9 +41,9 @@ test('buildValidator: builds on raw func with early break on pass', t => {
   test.stopValidationChainIfPass = true;
 
   const validator = buildValidator(test, validatorResolveDummy);
-  t.deepEqual(validator(createScope({$value: 'pass'}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 'pass'}, {})),
               {isValid: true, break: true});
-  t.deepEqual(validator(createScope({$value: 'fail'}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 'fail'}, {})),
               {isValid: false, errors: ['lorem']});
   t.end();
 });
@@ -56,39 +56,39 @@ test('buildValidator: builds on raw func with early break on fail', t => {
   test.stopValidationChainIfFail = true;
 
   const validator = buildValidator(test, validatorResolveDummy);
-  t.deepEqual(validator(createScope({$value: 'pass'}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 'pass'}, {})),
               {isValid: true});
-  t.deepEqual(validator(createScope({$value: 'fail'}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 'fail'}, {})),
               {isValid: false, errors: ['lorem'], break: true});
   t.end();
 });
 
 test('buildValidator: wraps bare expression, override $value to test', t => {
   const validator = buildValidator("a > 3", validatorResolveDummy);
-  t.deepEqual(validator(createScope({$value: 1, a: 4}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 1, a: 4}, {})),
               {isValid: true});
 
-  t.deepEqual(validator(createScope({$value: 1, a: 2}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 1, a: 2}, {})),
               {isValid: false, errors: ['invalid']});
   t.end();
 });
 
 test('buildValidator: transform single string with validatorResolve', t => {
   const validator = buildValidator("notTrue", validatorResolveDummy);
-  t.deepEqual(validator(createScope({$value: 0, a: 4}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 0, a: 4}, {})),
               {isValid: true});
 
-  t.deepEqual(validator(createScope({$value: 1, a: 2}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 1, a: 2}, {})),
               {isValid: false, errors: ['invalid']});
   t.end();
 });
 
 test('buildValidator: wraps regex, override $value to test', t => {
   const validator = buildValidator(/^ok/, validatorResolveDummy);
-  t.deepEqual(validator(createScope({$value: "ok"}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: "ok"}, {})),
               {isValid: true});
 
-  t.deepEqual(validator(createScope({$value: "not ok"}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: "not ok"}, {})),
               {isValid: false, errors: ['invalid']});
   t.end();
 });
@@ -101,10 +101,10 @@ test('buildValidator: resolve known validator', t => {
     validatorResolveDummy
   );
 
-  t.deepEqual(validator(createScope({$value: true}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: true}, {})),
               {isValid: true});
 
-  t.deepEqual(validator(createScope({$value: ""}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: ""}, {})),
               {isValid: false, errors: ['must be true']});
 
   // early break
@@ -113,10 +113,10 @@ test('buildValidator: resolve known validator', t => {
     validatorResolveDummy
   );
 
-  t.deepEqual(validator(createScope({$value: true}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: true}, {})),
               {isValid: true, break: true});
 
-  t.deepEqual(validator(createScope({$value: ""}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: ""}, {})),
               {isValid: false, errors: ['invalid']});
 
   validator = buildValidator(
@@ -124,10 +124,10 @@ test('buildValidator: resolve known validator', t => {
     validatorResolveDummy
   );
 
-  t.deepEqual(validator(createScope({$value: true}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: true}, {})),
               {isValid: true});
 
-  t.deepEqual(validator(createScope({$value: ""}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: ""}, {})),
               {isValid: false, errors: ['invalid'], break: true});
 
   // customize value (why testing my test dummy code??)
@@ -136,10 +136,10 @@ test('buildValidator: resolve known validator', t => {
     validatorResolveDummy
   );
 
-  t.deepEqual(validator(createScope({$value: 4}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 4}, {})),
               {isValid: true});
 
-  t.deepEqual(validator(createScope({$value: 1}, {})),
+  t.deepEqual(validator(createSimpleScope({$value: 1}, {})),
               {isValid: false, errors: ['a (1) must be greater than 3']});
 
   t.end();
@@ -160,7 +160,7 @@ test('buildValidator: builds chain of validators', t => {
     [],
     validatorResolveDummy
   );
-  t.deepEqual(validator(createScope({}, {})),
+  t.deepEqual(validator(createSimpleScope({}, {})),
               {isValid: true});
 
   validator = buildValidator(
@@ -171,7 +171,7 @@ test('buildValidator: builds chain of validators', t => {
     ],
     validatorResolveDummy
   );
-  t.deepEqual(validator(createScope({}, {})),
+  t.deepEqual(validator(createSimpleScope({}, {})),
               {isValid: true});
 
   validator = buildValidator(
@@ -182,7 +182,7 @@ test('buildValidator: builds chain of validators', t => {
     ],
     validatorResolveDummy
   );
-  t.deepEqual(validator(createScope({}, {})),
+  t.deepEqual(validator(createSimpleScope({}, {})),
               {isValid: false, errors: ['invalid', 'bar2']});
 
   validator = buildValidator(
@@ -193,7 +193,7 @@ test('buildValidator: builds chain of validators', t => {
     ],
     validatorResolveDummy
   );
-  t.deepEqual(validator(createScope({}, {})),
+  t.deepEqual(validator(createSimpleScope({}, {})),
               {isValid: false, errors: ['invalid']});
 
   validator = buildValidator(
@@ -204,7 +204,7 @@ test('buildValidator: builds chain of validators', t => {
     ],
     validatorResolveDummy
   );
-  t.deepEqual(validator(createScope({}, {})),
+  t.deepEqual(validator(createSimpleScope({}, {})),
               {isValid: false, errors: ['invalid']});
 
   validator = buildValidator(
@@ -215,7 +215,7 @@ test('buildValidator: builds chain of validators', t => {
     ],
     validatorResolveDummy
   );
-  t.deepEqual(validator(createScope({}, {})),
+  t.deepEqual(validator(createSimpleScope({}, {})),
               {isValid: true});
 
   t.end();
