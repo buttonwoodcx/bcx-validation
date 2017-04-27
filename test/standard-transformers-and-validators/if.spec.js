@@ -51,8 +51,8 @@ test('if: smart enough to separate validation from if transformer', t => {
   t.deepEqual(v.validate({meta: {if: ''}}, {meta: {if: 'mandatory'}}),
     {meta: {if: ['must not be empty']}});
 
-  // not smart enough for this
-  t.throws(() => v.validate({meta: {if: '', else: ''}}, {meta: {if: 'mandatory', else: 'mandatory'}}));
+  // not smart enough for this, it skips validation on 'else' field.
+  t.deepEqual(v.validate({meta: {if: '', else: ''}}, {meta: {if: 'mandatory', else: 'mandatory'}}), {});
 
   // need to be explicit
   t.deepEqual(v.validate({meta: {if: '', else: ''}}, {meta: {if: {validate: 'mandatory'}, else: 'mandatory'}}),

@@ -1,18 +1,19 @@
-import buildValidator from './build-validator';
 import {evaluate, createSimpleScope} from 'bcx-expression-evaluator';
 import valueEvaluator from './value-evaluator';
 import scopeVariation from './scope-variation';
+import validatorChain from './validator-chain';
+import standardValidatorWrap from './standard-validator-wrap';
 import {config as configStandardValidators} from './standard-validators';
 import _ from 'lodash';
 
 const NAME_FORMAT = /^[a-z][a-z0-9_]+/i;
 const NAME_FORMAT_ERROR = 'validation name must start with a letter, followed by letters, digits or underscore (_)';
+const PASSED = standardValidatorWrap(() => undefined);
 
 class Validation {
 
   constructor(opts = {}) {
     this.resolveValidator = this.resolveValidator.bind(this);
-    this.buildValidator = r => buildValidator(r, this.resolveValidator);
     this._validate = this._validate.bind(this);
     this.availableValidators = [];
     this.standardHelpers = {};
@@ -25,6 +26,43 @@ class Validation {
     configStandardValidators(this);
   }
 
+  buildValidator(rule) {
+    let id = Math.random();
+    const {message,
+         stopValidationChainIfPass,
+         stopValidationChainIfFail} = rule || {};
+
+    let validator;
+
+    if (_.isFunction(rule)) {
+      // raw rule in function
+      validator = valueEvaluator(rule);
+    } else if ((_.isString(rule) && !_.isEmpty(rule)) || _.isRegExp(rule)) {
+      // try validator tranformer first
+      // like we transform "mandatory" to {validate: "mandatory"}
+      validator = this.resolveValidator(rule);
+
+      if (!validator) {
+        // wrap single expression/regex in isTrue
+        validator = this.resolveValidator({validate: "isTrue", value: rule});
+      }
+    } else if (_.isObjectLike(rule)) {
+      const rawRule = _.omit(rule, ['message',
+                                    'stopValidationChainIfPass',
+                                    'stopValidationChainIfFail']);
+
+      validator = this.resolveValidator(rawRule);
+    }
+
+    if (!_.isFunction(validator)) {
+      throw new Error(`Unsupported rule[type=${typeof rule}]: ${JSON.stringify(rule)}`);
+    }
+
+    return standardValidatorWrap(validator, {message,
+                                             stopValidationChainIfPass,
+                                             stopValidationChainIfFail});
+  }
+
   resolveValidator(rule) {
     const found = _.find(this.availableValidators, v => v.test(rule));
     if (!found) return;
@@ -32,12 +70,11 @@ class Validation {
     const {validatorImp, transformer} = found;
     if (validatorImp) {
       // value & options can only been processed here,
-      // not in buildValidator.
       // As only resolveValidator knows there the rule obj
       // is a validatorImp or transformer,
       // only validatorImp creates scope variation to
       // override $value and options.
-      const validator = this.buildValidator(validatorImp);
+      const validator = this._validate(validatorImp);
       const value = _.get(rule, 'value', '');
       const options = _.omit(rule, ['value', 'validate']);
 
@@ -76,7 +113,7 @@ class Validation {
       if (transformed.readyToUse) {
         return transformed;
       } else {
-        return this.buildValidator(transformed);
+        return this._validate(transformed);
       }
     } else {
       throw new Error('No transformer or validatorImp defined.');
@@ -131,70 +168,51 @@ class Validation {
     // initial $value and $propertyPath
     _.merge(scope.overrideContext, {$value: model, $propertyPath: ''});
 
-    return this._validate(scope, rulesMap);
+    const result = this._validate(rulesMap)(scope);
+    return result.errors || {};
   }
 
-  _validate(scope, rulesMap, inPropertyName) {
-    let error = {};
-    if (_.isEmpty(rulesMap)) return error;
+  _validate(rulesMap, inPropertyName) {
+    if (_.isUndefined(rulesMap) || _.isNull(rulesMap)) return PASSED;
 
-    // validate the whole model without any nested property validation
-    if (this.resolveValidator(rulesMap) ||
-        _.isString(rulesMap) ||
-        _.isRegExp(rulesMap) ||
-        _.isFunction(rulesMap)) {
-      rulesMap = [rulesMap];
-    }
+    try {
+      // try validate the whole model without any nested property validation
+      return this.buildValidator(rulesMap);
 
-    if (_.isArray(rulesMap)) {
-      const validator = this.buildValidator(rulesMap);
-      const result = validator(scope);
-      if (result.isValid === false) {
-        return result.errors;
-      }
-    } else if (_.isObjectLike(rulesMap)) {
-      _.each(rulesMap, (rules, propertyName) => {
-        const path = inPropertyName ? `${inPropertyName}.${propertyName}` : propertyName;
-        const value = valueEvaluator(path)(scope);
-        const localScope = scopeVariation(scope, {
-          $value: value,
-          $propertyPath: path,
+    } catch (e) {
+      // try other
+      if (_.isArray(rulesMap)) {
+        // composition of rules
+        const subRules = _.map(rulesMap, r => this._validate(r, inPropertyName));
+        return standardValidatorWrap(validatorChain(subRules));
+
+      } else if (_.isObjectLike(rulesMap)) {
+        // nested rules
+        return standardValidatorWrap(scope => {
+          const errors = {};
+          _.each(rulesMap, (rules, propertyName) => {
+            const path = inPropertyName ? `${inPropertyName}.${propertyName}` : propertyName;
+
+            const value = valueEvaluator(path)(scope);
+            const localScope = scopeVariation(scope, {
+              $value: value,
+              $propertyPath: path,
+            });
+
+            const result = this._validate(rules, path)(localScope);
+
+            if (result.isValid === false) {
+              errors[propertyName] = result.errors;
+            }
+          });
+
+          return {isValid: _.isEmpty(errors), errors};
         });
 
-        // try if it's a single validation
-        // wrap single validation in array
-        if (this.resolveValidator(rules) ||
-            _.isString(rules) ||
-            _.isRegExp(rules) ||
-            _.isFunction(rules)) {
-          rules = [rules];
-        }
-
-        if (_.isArray(rules)) {
-          let validator;
-          try {
-            validator = this.buildValidator(rules);
-          } catch (e) {
-            throw new Error(`[when validating ${path}] ${e.message}`);
-          }
-          const result = validator(localScope);
-          if (result.isValid === false) {
-            error[propertyName] = result.errors;
-          }
-        } else if (_.isObjectLike(rules)) {
-          const nestedErrors = this._validate(scope, rules, path);
-
-          if (!_.isEmpty(nestedErrors)) {
-            error[propertyName] = nestedErrors;
-          }
-        } else {
-          throw new Error('Unexpected rules: '+JSON.stringify(rules));
-        }
-
-      });
+      } else {
+        throw new Error('Unexpected rules: ' + JSON.stringify(rulesMap));
+      }
     }
-
-    return error;
   }
 
 }
