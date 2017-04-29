@@ -71,6 +71,10 @@ export const forEachTransformer = function (rule, validate) {
   let foreachRulesMapFunc;
   if (_.isFunction(foreachRulesMap)) {
     foreachRulesMapFunc = valueEvaluator(foreachRulesMap);
+  } else if (_.isArray(foreachRulesMap)) {
+    foreachRulesMapFunc = scope => _.map(foreachRulesMap, r =>
+      _.isFunction(r) ? valueEvaluator(r)(scope) : r
+    );
   }
 
   const _key = _.get(rule, 'key', '$index');
