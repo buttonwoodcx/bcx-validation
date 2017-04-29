@@ -53,11 +53,7 @@ export const switchTransformer = function (rule, validate) {
     // console.log('  scope: ' + JSON.stringify(scope, null, 2));
     if (!matchCase) return;
 
-    const errors = validate(scope, matchCase, nestedPath);
-    if (!_.isEmpty(errors)) {
-      // console.log('errors:'+JSON.stringify(errors));
-      return {isValid: false, errors: errors};
-    }
+    return validate(matchCase, nestedPath)(scope);
   };
 
   validator.readyToUse = true;
@@ -75,13 +71,17 @@ export const forEachTransformer = function (rule, validate) {
   let foreachRulesMapFunc;
   if (_.isFunction(foreachRulesMap)) {
     foreachRulesMapFunc = valueEvaluator(foreachRulesMap);
+  } else if (_.isArray(foreachRulesMap)) {
+    foreachRulesMapFunc = scope => _.map(foreachRulesMap, r =>
+      _.isFunction(r) ? valueEvaluator(r)(scope) : r
+    );
   }
 
   const _key = _.get(rule, 'key', '$index');
   const keyEvaluator = valueEvaluator(_key);
 
   const validator = scope => {
-    let result = {};
+    let errors = {};
     const enumerable = valueEvaluator('$value')(scope);
     const length = _.size(enumerable);
     _.each(enumerable, (item, index) => {
@@ -105,18 +105,16 @@ export const forEachTransformer = function (rule, validate) {
       };
 
       const key = keyEvaluator(newScope);
-      const errors = validate(newScope, foreachRulesMapFunc ?
-                                        foreachRulesMapFunc(newScope) :
-                                        foreachRulesMap);
+      const result = validate(foreachRulesMapFunc ?
+                              foreachRulesMapFunc(newScope) :
+                              foreachRulesMap)(newScope);
 
-      if (!_.isEmpty(errors)) {
-        result[key] = errors;
+      if (result.isValid === false) {
+        errors[key] = result.errors;
       }
     });
 
-    if (!_.isEmpty(result)) {
-      return {isValid: false, errors: result};
-    }
+    return {isValid: _.isEmpty(errors), errors};
   };
 
   validator.readyToUse = true;

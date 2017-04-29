@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 const v = new Validation();
 
-test('Validate: validates whole object', t => {
+test('Validation: validates whole object', t => {
   let rule = {
     name: [
       {validate: "mandatory"},
@@ -51,7 +51,63 @@ test('Validate: validates whole object', t => {
   t.end();
 });
 
-test('Validate: validates nested object', t => {
+test('Validation: can stack rules', t => {
+  let rule = [
+    {
+      name: [
+        {validate: "mandatory"}
+      ],
+      age: [
+        "notMandatory",
+        {validate: "number", integer: true, min: 0, max: 99}
+      ]
+    }, {
+      name: [
+        {validate: "mandatory"},
+        {validate: /[a-z]/i, message: "must contain letters"}
+      ],
+      age: [
+        "notMandatory"
+      ]
+    }
+  ];
+
+  t.deepEqual(v.validate({name: "hello", age: 20}), {});
+  t.deepEqual(v.validate({name: "", age: null}, rule), {name: ["must not be empty"]});
+  t.deepEqual(v.validate({name: ":-(", age: null}, rule), {name: ["must contain letters"]});
+
+  t.deepEqual(v.validate({name: ":-(", age: "20"}, rule), {
+    name: ["must contain letters"],
+    age: ["must be a number"]
+  });
+
+  t.deepEqual(v.validate({name: "", age: 210.3}, rule), {
+    name: ["must not be empty"],
+    age: ["must be an integer"]
+  });
+
+  t.deepEqual(v.validate({name: "", age: 0}, rule), {
+    name: ["must not be empty"]
+  });
+
+  t.deepEqual(v.validate({name: "", age: -1}, rule), {
+    name: ["must not be empty"],
+    age: ["must be at least 0"]
+  });
+
+  t.deepEqual(v.validate({name: "", age: 99}, rule), {
+    name: ["must not be empty"]
+  });
+
+  t.deepEqual(v.validate({name: "", age: 100}, rule), {
+    name: ["must not be empty"],
+    age: ["must be no more than 99"]
+  });
+
+  t.end();
+});
+
+test('Validation: validates nested object', t => {
   let rule = {
     detail: {
       name: [
@@ -85,7 +141,7 @@ test('Validate: validates nested object', t => {
   t.end();
 });
 
-test('Validate: validates deep nested object', t => {
+test('Validation: validates deep nested object', t => {
   let rule = {
     meta: {
       detail: {
@@ -145,7 +201,7 @@ test('Validate: validates deep nested object', t => {
 });
 
 
-test('Validate: validates instance of constructor func', t => {
+test('Validation: validates instance of constructor func', t => {
   function Model(a, b) {
     this.a = a;
     this.b = b;
@@ -166,19 +222,19 @@ test('Validate: validates instance of constructor func', t => {
   t.end();
 });
 
-test('Validate: validates simple value', t => {
+test('Validation: validates simple value', t => {
   let rules = {validate: "number", min: 5};
   t.deepEqual(v.validate(3, rules), ["must be at least 5"]);
   t.end();
 });
 
-test('Validate: wraps errors', t => {
+test('Validation: wraps errors', t => {
   let rules = {validate: "number", min: 5, message: "${_.join($errors, ', ')} to be fit in"};
   t.deepEqual(v.validate(3, rules), ["must be at least 5 to be fit in"]);
   t.end();
 });
 
-test('Validate: can add default helper', t => {
+test('Validation: can add default helper', t => {
   v.addHelper('sum', (a, b) => a + b);
   let rules = {
     a: {validate: 'isTrue', value: 'sum($value, b) > 10', message: "sum(${sum($value,b)}) is not more than 10"}

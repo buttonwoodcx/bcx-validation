@@ -2,45 +2,29 @@ import _ from 'lodash';
 
 const BASE = '__base__';
 
-function mergeArray(objValue, srcValue) {
-  if (_.isArray(objValue)) {
-    return objValue.concat(srcValue);
+function uniqCompact(arr1 = [], arr2 = []) {
+  return _([...arr1, ...arr2]).map(_.trim).compact().uniq().value();
+}
+
+function mergeErrorUnit(e1, e2) {
+  if (_.isArray(e1) && _.isArray(e2)) {
+    return uniqCompact(e1, e2);
+  } else if (_.isArray(e1) && _.isPlainObject(e2)) {
+    const baseErrors = uniqCompact(e1, e2[BASE]);
+    let merged = {...e2};
+    if (baseErrors.length) merged[BASE] = baseErrors;
+    return merged;
+  } else if (_.isArray(e2) && _.isPlainObject(e1)) {
+    const baseErrors = uniqCompact(e2, e1[BASE]);
+    let merged = {...e1};
+    if (baseErrors.length) merged[BASE] = baseErrors;
+    return merged;
   }
 }
 
 export function mergedErrors(errs1, errs2) {
-  let result = {
-    [BASE]: []
-  };
-
-  function _merge(errs) {
-    if (errs) {
-      if (_.isArray(errs)) {
-        _.mergeWith(result, {[BASE]: errs}, mergeArray);
-      } else if (_.isObjectLike(errs)) {
-        _.mergeWith(result, errs, mergeArray);
-      }
-    }
-  }
-
-  _merge(errs1);
-  _merge(errs2);
-
-  result = _.mapValues(result, v => _.isArray(v) ?
-                                    _(v).compact().map(_.trim).uniq().value() :
-                                    v);
-
-  let cleanResult = {};
-  _.each(result, (v, k) => {
-    if (!_.isEmpty(v)) cleanResult[k] = v;
-  });
-
-  if (_.size(cleanResult) === 1 && cleanResult[BASE]) {
-    // only top level errors
-    return cleanResult[BASE];
-  } else {
-    return cleanResult;
-  }
+  const merged = _.mergeWith({e: errs1 || []}, {e: errs2}, mergeErrorUnit);
+  return merged.e;
 };
 
 export default class ValidationResult {
