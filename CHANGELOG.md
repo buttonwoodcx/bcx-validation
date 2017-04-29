@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 - 30/Apr/2017
+
+  * fix broken 0.2.0 as it was accidentally published through npm v3 (missing npm prepare).
+
 ## 0.2.0 - 30/Apr/2017
 
   * better support of nested validation.
