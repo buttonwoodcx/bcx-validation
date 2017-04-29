@@ -139,5 +139,27 @@ test('ValidationResult: merge nested errors', t => {
   t.end();
 });
 
+test('ValidationResult: merge deep nested errors', t => {
+  let result = [
+    [
+      {isValid: true},
+      ['foo', 'goo'],
+      {isValid: false, errors: {a: ['bar'], b: ['goo', 'foo']}}
+    ],
+    [
+      "bar  ",
+      {isValid: false, errors: {a: ['bar'], b: ['foo']}},
+      {isValid: false, errors: {__base__: ['xyz'], a: ['bar', 'goo'], b: ['foo']}}
+    ]
+  ];
+
+  t.deepEqual(v(result), {
+    isValid: false,
+    errors: {__base__: ['foo', 'goo', 'bar', 'xyz'], a: ['bar', 'goo'], b: ['goo', 'foo']}
+  });
+
+  t.end();
+});
+
 
 
