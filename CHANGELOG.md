@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0 - 30/Apr/2017
+
+  * better support of nested validation.
+
 ## 0.1.7 - 21/Apr/2017
 
   * better error report.
