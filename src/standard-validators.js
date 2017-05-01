@@ -41,16 +41,12 @@ export const switchTransformer = function (rule, validate) {
     let nestedPath;
     if (_.isObjectLike(valueEvaluator('$value')(scope))) {
       nestedPath = valueEvaluator('$propertyPath')(scope);
-      // console.log(' nestedPath:'+nestedPath);
     }
 
     const switchEvaluator = valueEvaluator(nestedPath ? `${nestedPath}.${_switch}` : _switch);
 
     const _case = switchEvaluator(scope);
     const matchCase = cases[_case];
-    // console.log('  case: '+_case);
-    // console.log('  matchCase: '+JSON.stringify(matchCase));
-    // console.log('  scope: ' + JSON.stringify(scope, null, 2));
     if (!matchCase) return;
 
     return validate(matchCase, nestedPath)(scope);
