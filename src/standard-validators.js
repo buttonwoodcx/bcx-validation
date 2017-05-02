@@ -31,21 +31,41 @@ export const ifTransformer = function (rule) {
   return rules;
 };
 
-// TODO: do we need to support switch: a_function?
+export const switchTester = function (rule) {
+  if (!_.has(rule, 'switch')) return false;
+  if (!_.has(rule, 'cases')) return false;
+  if (!_.isEmpty(_.omit(rule, ['switch', 'cases']))) return false;
+  return (_.isString(rule.switch) || _.isFunction(rule.switch)) &&
+    _.isObjectLike(rule.cases);
+};
+
 export const switchTransformer = function (rule, validate) {
   const _switch = _.get(rule, 'switch');
   const cases = _.get(rule, 'cases');
+  const switchEvaluator = valueEvaluator(_switch);
 
   const validator = scope => {
     // make a guess whether user try to use nested validation or plain validation
-    let nestedPath;
-    if (_.isObjectLike(valueEvaluator('$value')(scope))) {
+    const value = valueEvaluator('$value')(scope);
+    let nestedPath, _case;
+
+    if (_.isObjectLike(value)) {
+      // in nested object
       nestedPath = valueEvaluator('$propertyPath')(scope);
+      const {overrideContext} = scope;
+      let newOverrideContext = createOverrideContext(value, overrideContext);
+      newOverrideContext.$value = value;
+      const newScope = {
+        bindingContext: value,
+        overrideContext: newOverrideContext
+      };
+
+      _case = switchEvaluator(newScope);
+    } else {
+      // normal switch
+      _case = switchEvaluator(scope);
     }
 
-    const switchEvaluator = valueEvaluator(nestedPath ? `${nestedPath}.${_switch}` : _switch);
-
-    const _case = switchEvaluator(scope);
     const matchCase = cases[_case];
     if (!matchCase) return;
 
@@ -57,8 +77,8 @@ export const switchTransformer = function (rule, validate) {
 };
 
 export const forEachTester = function (rule) {
-  if (!_.has(rule, 'foreach')) return;
-  if (!_.isEmpty(_.omit(rule, ['foreach', 'key']))) return;
+  if (!_.has(rule, 'foreach')) return false;
+  if (!_.isEmpty(_.omit(rule, ['foreach', 'key']))) return false;
   return true;
 };
 
@@ -147,7 +167,7 @@ export const standardTransformers = [
   //
   // note: 'switch' is a reserved word in javascript but not in bcx-expression
   // be less surprising but verbose, write "_.isString($this['switch'])"
-  ["_.isString(switch) && _.isObjectLike(cases) && _.isEmpty(_.omit($this, 'switch', 'cases'))", switchTransformer],
+  ["(_.isString(switch) || _.isFunction(switch)) && _.isObjectLike(cases) && _.isEmpty(_.omit($this, 'switch', 'cases'))", switchTransformer],
 
   // foreach
   //

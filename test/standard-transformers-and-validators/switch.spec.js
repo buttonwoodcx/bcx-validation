@@ -4,10 +4,33 @@ import _ from 'lodash';
 
 const v = new Validation();
 
-test('switch: switch cases', t => {
+test('switch: switch cases with expression', t => {
   let rule = {
     value: {
       "switch": "type",
+      "cases": {
+        "string": {validate: "string", minLength: 4},
+        "number": ["notMandatory", {validate: "number", min: 10}]
+      }
+    }
+  };
+
+  t.deepEqual(v.validate({value: 'on', type: 'string'}, rule), {
+    value: ["must have at least 4 characters"]
+  });
+
+  t.deepEqual(v.validate({value: 5, type: 'number'}, rule), {
+    value: ["must be at least 10"]
+  });
+
+  t.deepEqual(v.validate({value: null, type: 'number'}, rule), {});
+  t.end();
+});
+
+test('switch: switch cases with func', t => {
+  let rule = {
+    value: {
+      "switch": (v, path, obj) => obj.type,
       "cases": {
         "string": {validate: "string", minLength: 4},
         "number": ["notMandatory", {validate: "number", min: 10}]
@@ -47,6 +70,66 @@ test('switch: switch cases on nested validation', t => {
   });
 
   t.deepEqual(v.validate({meta: {value: null, type: 'number'}}, rule), {});
+  t.end();
+});
+
+test('switch: complex switch cases on nested validation', t => {
+  let rule = {
+    meta: {
+      "switch": "domain + ':' + type",
+      "cases": {
+        "admin:string": {value: {validate: "string", minLength: 4}},
+        "admin:number": {value: ["notMandatory", {validate: "number", min: 10}]}
+      }
+    }
+  };
+
+  t.deepEqual(v.validate({meta: {value: 'on', type: 'string', domain: 'admin'}}, rule), {
+    meta: {value: ["must have at least 4 characters"]}
+  });
+
+  t.deepEqual(v.validate({meta: {value: 5, type: 'number', domain: 'admin'}}, rule), {
+    meta: {value: ["must be at least 10"]}
+  });
+
+  t.deepEqual(v.validate({meta: {value: null, type: 'number', domain: 'admin'}}, rule), {});
+
+  t.deepEqual(v.validate({meta: {value: 'on', type: 'string', domain: 'user'}}, rule), {});
+
+  t.deepEqual(v.validate({meta: {value: 5, type: 'number', domain: 'user'}}, rule), {});
+
+  t.deepEqual(v.validate({meta: {value: null, type: 'number', domain: 'user'}}, rule), {});
+
+  t.end();
+});
+
+test('switch: func switch on nested validation', t => {
+  let rule = {
+    meta: {
+      "switch": o => o.domain + ':' + o.type,
+      "cases": {
+        "admin:string": {value: {validate: "string", minLength: 4}},
+        "admin:number": {value: ["notMandatory", {validate: "number", min: 10}]}
+      }
+    }
+  };
+
+  t.deepEqual(v.validate({meta: {value: 'on', type: 'string', domain: 'admin'}}, rule), {
+    meta: {value: ["must have at least 4 characters"]}
+  });
+
+  t.deepEqual(v.validate({meta: {value: 5, type: 'number', domain: 'admin'}}, rule), {
+    meta: {value: ["must be at least 10"]}
+  });
+
+  t.deepEqual(v.validate({meta: {value: null, type: 'number', domain: 'admin'}}, rule), {});
+
+  t.deepEqual(v.validate({meta: {value: 'on', type: 'string', domain: 'user'}}, rule), {});
+
+  t.deepEqual(v.validate({meta: {value: 5, type: 'number', domain: 'user'}}, rule), {});
+
+  t.deepEqual(v.validate({meta: {value: null, type: 'number', domain: 'user'}}, rule), {});
+
   t.end();
 });
 
