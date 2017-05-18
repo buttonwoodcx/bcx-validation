@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3 - 18/May/2017
+
+  * fix an issue on nested validation when propertyName cannot be used in dot notation (obj.123 syntax error).
+
 ## 0.2.2 - 02/May/2017
 
   * fix switch transformer bug on complex expression.

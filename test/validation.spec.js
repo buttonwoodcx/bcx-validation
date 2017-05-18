@@ -141,6 +141,40 @@ test('Validation: validates nested object', t => {
   t.end();
 });
 
+test('Validation: validates nested object with key cannot use dot notation (cannot do obj.123)', t => {
+  let rule = {
+    detail: {
+      '1name': [
+        {validate: "mandatory"},
+        {validate: /[a-z]/i, message: "must contain letters"}
+      ],
+      2: [
+        "notMandatory",
+        {validate: "number", integer: true, min: 0, max: 99}
+      ]
+    },
+    id: "mandatory"
+  };
+
+
+  t.deepEqual(v.validate({detail: {'1name': "", 2: 100}}, rule), {
+    id: ["must not be empty"],
+    detail: {
+      '1name': ["must not be empty"],
+      2: ["must be no more than 99"]
+    }
+  });
+
+  t.deepEqual(v.validate({detail: {'1name': "", 2: 100}, id: 2}, rule), {
+    detail: {
+      '1name': ["must not be empty"],
+      2: ["must be no more than 99"]
+    }
+  });
+
+  t.end();
+});
+
 test('Validation: validates deep nested object', t => {
   let rule = {
     meta: {

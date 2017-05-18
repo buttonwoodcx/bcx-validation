@@ -108,7 +108,7 @@ export const forEachTransformer = function (rule, validate) {
 
       _.merge(newOverrideContext, {
         $value: item,
-        $propertyPath: '', // initial propertyPath
+        $propertyPath: null, // initial propertyPath
         $neighbours: neighbours,
         $index: index,
         $first: index === 0,
@@ -295,7 +295,7 @@ export const standardValidators = [
   // unique. need to access neighbours
   // option items is evaluated from current scope
   // neighbours could be simple value (when no propertyPath)
-  ["unique", {validate: "notIn", "items.bind": "$propertyPath ? _.map($neighbours, $propertyPath) : $neighbours", message: "must be unique"}],
+  ["unique", {validate: "notIn", "items.bind": "$propertyPath ? _.map($neighbours, _.property($propertyPath)) : $neighbours", message: "must be unique"}],
 ];
 
 export function config (validation) {

@@ -191,9 +191,9 @@ class Validation {
         return standardValidatorWrap(scope => {
           const errors = {};
           _.each(rulesMap, (rules, propertyName) => {
-            const path = inPropertyName ? `${inPropertyName}.${propertyName}` : propertyName;
+            const path = inPropertyName ? [...inPropertyName, propertyName] : [propertyName];
 
-            const value = valueEvaluator(path)(scope);
+            const value = _.get(valueEvaluator('$this')(scope), path);
             const localScope = scopeVariation(scope, {
               $value: value,
               $propertyPath: path,
