@@ -194,9 +194,11 @@ class Validation {
             const path = inPropertyName ? [...inPropertyName, propertyName] : [propertyName];
 
             const value = _.get(valueEvaluator('$this')(scope), path);
+            const neighbourValues = _.map(valueEvaluator('$neighbours')(scope), _.property(path));
             const localScope = scopeVariation(scope, {
               $value: value,
               $propertyPath: path,
+              $neighbourValues: neighbourValues
             });
 
             const result = this._validate(rules, path)(localScope);
