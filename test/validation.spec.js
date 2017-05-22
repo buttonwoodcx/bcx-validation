@@ -280,3 +280,16 @@ test('Validation: can add default helper', t => {
 
   t.end();
 });
+
+test('Validation: user defined transformer works', t => {
+  v.addTransformer("_.isString(ifNot) && !_.isEmpty(_.omit($this, 'ifNot'))", rule => {
+    const {ifNot, ...others} = rule;
+    return {if: `!(${ifNot})`, ...others};
+  });
+
+  const rule = {value: {ifNot: "type == 'abc'", validate: "mandatory"}};
+
+  t.deepEqual(v.validate({type: 'abc', value: ''}, rule), {});
+  t.deepEqual(v.validate({type: 'xyz', value: ''}, rule), {value: ["must not be empty"]});
+  t.end();
+});

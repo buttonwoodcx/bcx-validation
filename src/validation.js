@@ -15,7 +15,10 @@ class Validation {
   constructor(opts = {}) {
     this.resolveValidator = this.resolveValidator.bind(this);
     this._validate = this._validate.bind(this);
-    this.availableValidators = [];
+
+    this._transformers = [];
+    this._validators = [];
+
     this.standardHelpers = {};
     this.withStandardValidators();
     // add lodash to helper by default
@@ -64,17 +67,24 @@ class Validation {
   }
 
   resolveValidator(rule) {
-    const found = _.find(this.availableValidators, v => v.test(rule));
-    if (!found) return;
+    const _transformer = _.find(this._transformers, v => v.test(rule));
+    const _validator = _.find(this._validators, v => v.test(rule));
 
-    const {validatorImp, transformer} = found;
-    if (validatorImp) {
+    if (_transformer) {
+      // transformer
+      const transformed = _transformer.transformer(rule, this._validate);
+      if (transformed.readyToUse) {
+        return transformed;
+      } else {
+        return this._validate(transformed);
+      }
+    } else if (_validator) {
       // value & options can only been processed here,
       // As only resolveValidator knows there the rule obj
       // is a validatorImp or transformer,
       // only validatorImp creates scope variation to
       // override $value and options.
-      const validator = this._validate(validatorImp);
+      const validator = this._validate(_validator.validatorImp);
       const value = _.get(rule, 'value', '');
       const options = _.omit(rule, ['value', 'validate']);
 
@@ -107,18 +117,10 @@ class Validation {
 
         return validator(scopeVariation(scope, variation));
       };
-    } else if (transformer) {
-      // transformer
-      const transformed = transformer(rule, this._validate);
-      if (transformed.readyToUse) {
-        return transformed;
-      } else {
-        return this._validate(transformed);
-      }
-    } else {
-      throw new Error('No transformer or validatorImp defined.');
-    }
 
+    } else {
+      // ignore
+    }
   }
 
   addTransformer(tester, transformer) {
@@ -131,7 +133,7 @@ class Validation {
       throw new Error('Invalid transformer tester: ' + tester);
     }
 
-    this.availableValidators.push({
+    this._transformers.push({
       test: testFunc,
       transformer
     });
@@ -147,7 +149,7 @@ class Validation {
 
     const tester = `validate === '${name}'`;
 
-    this.availableValidators.push({
+    this._validators.push({
       test: rule => evaluate(tester, rule, {_}),
       validatorImp: imp
     });
