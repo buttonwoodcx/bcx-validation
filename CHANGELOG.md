@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.4 - 22/May/2017
+
+  * fix an issue on user defined transformer. Transformers should have higher precedence than all validators.
+
 ## 0.2.3 - 18/May/2017
 
   * fix an issue on nested validation when propertyName cannot be used in dot notation (obj.123 syntax error).
