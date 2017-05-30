@@ -6,11 +6,11 @@ const v = new Validation();
 
 test('isTrue: validates isTrue', t => {
   let rule = {a: {validate: "isTrue"}};
-  t.deepEqual(v.validate({a: true}, rule), {});
+  t.equal(v.validate({a: true}, rule), undefined);
   t.deepEqual(v.validate({a: false}, rule), {a: ['must be true']});
 
   rule = {a: {validate: "isTrue", message: '${$propertyPath}:${$value} is not true'}};
-  t.deepEqual(v.validate({a: true}, rule), {});
+  t.equal(v.validate({a: true}, rule), undefined);
   t.deepEqual(v.validate({a: false}, rule), {a: ['a:false is not true']});
 
   rule = {
@@ -20,7 +20,7 @@ test('isTrue: validates isTrue', t => {
       message: "b:${$this.b} must be smaller than c:${$this.c}"
     }
   };
-  t.deepEqual(v.validate({a: false, b: 1, c: 2}, rule), {});
+  t.equal(v.validate({a: false, b: 1, c: 2}, rule), undefined);
   t.deepEqual(v.validate({a: true, b: 2, c: 1}, rule), {a: ['b:2 must be smaller than c:1']});
 
   rule = {
@@ -30,7 +30,7 @@ test('isTrue: validates isTrue', t => {
       message: "b:${$this.b} must be smaller than c:${$this.c}"
     }]
   };
-  t.deepEqual(v.validate({a: false, b: 1, c: 2}, rule), {});
+  t.equal(v.validate({a: false, b: 1, c: 2}, rule), undefined);
   t.deepEqual(v.validate({a: true, b: 2, c: 1}, rule), {a: ['b:2 must be smaller than c:1']});
 
   t.end();
@@ -44,7 +44,7 @@ test('isTrue: lodash is in helper by default', t => {
       message: "must contain apple"
     }
   };
-  t.deepEqual(v.validate({a: ['bar', 'apple', 'foo']}, rule), {});
+  t.equal(v.validate({a: ['bar', 'apple', 'foo']}, rule), undefined);
   t.deepEqual(v.validate({a: ['bar', 'foo']}, rule), {a: ['must contain apple']});
   t.end();
 });
@@ -61,7 +61,7 @@ test('Validation: can use helper', t => {
   const myjoin = arr => _.join(arr, '-');
 
   t.deepEqual(v.validate({a: ['bar', 'apple', 'foo']}, rule, {myjoin}), {a: ['lorem']});
-  t.deepEqual(v.validate({a: ['bar', 'foo']}, rule, {myjoin}), {});
+  t.equal(v.validate({a: ['bar', 'foo']}, rule, {myjoin}), undefined);
 
   // if helper is missing
   t.deepEqual(v.validate({a: ['bar', 'foo']}, rule), {a: ['lorem']}, 'missing helper yields undefined');

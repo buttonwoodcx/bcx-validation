@@ -16,7 +16,7 @@ test('Validation: validates whole object', t => {
     ]
   };
 
-  t.deepEqual(v.validate({name: "hello", age: 20}), {});
+  t.equal(v.validate({name: "hello", age: 20}), undefined);
   t.deepEqual(v.validate({name: "", age: null}, rule), {name: ["must not be empty"]});
   t.deepEqual(v.validate({name: ":-(", age: null}, rule), {name: ["must contain letters"]});
 
@@ -72,7 +72,7 @@ test('Validation: can stack rules', t => {
     }
   ];
 
-  t.deepEqual(v.validate({name: "hello", age: 20}), {});
+  t.equal(v.validate({name: "hello", age: 20}), undefined);
   t.deepEqual(v.validate({name: "", age: null}, rule), {name: ["must not be empty"]});
   t.deepEqual(v.validate({name: ":-(", age: null}, rule), {name: ["must contain letters"]});
 
@@ -229,7 +229,7 @@ test('Validation: validates deep nested object', t => {
     }
   });
 
-  t.deepEqual(v.validate({meta: {detail: {name: "abc", age: 22}, id: 2}}, rule), {});
+  t.equal(v.validate({meta: {detail: {name: "abc", age: 22}, id: 2}}, rule), undefined);
 
   t.end();
 });
@@ -289,7 +289,7 @@ test('Validation: user defined transformer works', t => {
 
   const rule = {value: {ifNot: "type == 'abc'", validate: "mandatory"}};
 
-  t.deepEqual(v.validate({type: 'abc', value: ''}, rule), {});
+  t.equal(v.validate({type: 'abc', value: ''}, rule), undefined);
   t.deepEqual(v.validate({type: 'xyz', value: ''}, rule), {value: ["must not be empty"]});
   t.end();
 });

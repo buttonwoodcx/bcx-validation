@@ -13,8 +13,8 @@ test('passImmediatelyIf: pass immediately', t => {
   };
 
   t.deepEqual(v.validate({a: ""}, rule), {a: ['not good :-(']});
-  t.deepEqual(v.validate({a: "bad"}, rule), {});
-  t.deepEqual(v.validate({a: "good"}, rule), {});
+  t.equal(v.validate({a: "bad"}, rule), undefined);
+  t.equal(v.validate({a: "good"}, rule), undefined);
 
   rule = {
     a: [
@@ -23,9 +23,9 @@ test('passImmediatelyIf: pass immediately', t => {
     ]
   };
 
-  t.deepEqual(v.validate({a: ""}, rule), {});
+  t.equal(v.validate({a: ""}, rule), undefined);
   t.deepEqual(v.validate({a: "bad"}, rule), {a: ['not good :-(']});
-  t.deepEqual(v.validate({a: "good"}, rule), {});
+  t.equal(v.validate({a: "good"}, rule), undefined);
 
   t.end();
 });
@@ -39,8 +39,8 @@ test('skipImmediatelyIf: skip immediately', t => {
   };
 
   t.deepEqual(v.validate({a: ""}, rule), {a: ['not good :-(']});
-  t.deepEqual(v.validate({a: "bad"}, rule), {});
-  t.deepEqual(v.validate({a: "good"}, rule), {});
+  t.equal(v.validate({a: "bad"}, rule), undefined);
+  t.equal(v.validate({a: "good"}, rule), undefined);
 
   rule = {
     a: [
@@ -49,9 +49,9 @@ test('skipImmediatelyIf: skip immediately', t => {
     ]
   };
 
-  t.deepEqual(v.validate({a: ""}, rule), {});
+  t.equal(v.validate({a: ""}, rule), undefined);
   t.deepEqual(v.validate({a: "bad"}, rule), {a: ['not good :-(']});
-  t.deepEqual(v.validate({a: "good"}, rule), {});
+  t.equal(v.validate({a: "good"}, rule), undefined);
 
   t.end();
 });
@@ -77,7 +77,7 @@ test('failImmediatelyIf: fail immediately', t => {
 
   t.deepEqual(v.validate({a: ""}, rule), {a: ['should be true!']});
   t.deepEqual(v.validate({a: "bad"}, rule), {a: ['not good :-(']});
-  t.deepEqual(v.validate({a: "good"}, rule), {});
+  t.equal(v.validate({a: "good"}, rule), undefined);
 
   t.end();
 });

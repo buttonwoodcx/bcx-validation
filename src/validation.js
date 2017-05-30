@@ -171,7 +171,7 @@ class Validation {
     _.merge(scope.overrideContext, {$value: model, $propertyPath: ''});
 
     const result = this._validate(rulesMap)(scope);
-    return result.errors || {};
+    return result.errors;
   }
 
   _validate(rulesMap, inPropertyName) {

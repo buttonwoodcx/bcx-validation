@@ -23,7 +23,7 @@ test('switch: switch cases with expression', t => {
     value: ["must be at least 10"]
   });
 
-  t.deepEqual(v.validate({value: null, type: 'number'}, rule), {});
+  t.equal(v.validate({value: null, type: 'number'}, rule), undefined);
   t.end();
 });
 
@@ -46,7 +46,7 @@ test('switch: switch cases with func', t => {
     value: ["must be at least 10"]
   });
 
-  t.deepEqual(v.validate({value: null, type: 'number'}, rule), {});
+  t.equal(v.validate({value: null, type: 'number'}, rule), undefined);
   t.end();
 });
 
@@ -69,7 +69,7 @@ test('switch: switch cases on nested validation', t => {
     meta: {value: ["must be at least 10"]}
   });
 
-  t.deepEqual(v.validate({meta: {value: null, type: 'number'}}, rule), {});
+  t.equal(v.validate({meta: {value: null, type: 'number'}}, rule), undefined);
   t.end();
 });
 
@@ -92,13 +92,13 @@ test('switch: complex switch cases on nested validation', t => {
     meta: {value: ["must be at least 10"]}
   });
 
-  t.deepEqual(v.validate({meta: {value: null, type: 'number', domain: 'admin'}}, rule), {});
+  t.equal(v.validate({meta: {value: null, type: 'number', domain: 'admin'}}, rule), undefined);
 
-  t.deepEqual(v.validate({meta: {value: 'on', type: 'string', domain: 'user'}}, rule), {});
+  t.equal(v.validate({meta: {value: 'on', type: 'string', domain: 'user'}}, rule), undefined);
 
-  t.deepEqual(v.validate({meta: {value: 5, type: 'number', domain: 'user'}}, rule), {});
+  t.equal(v.validate({meta: {value: 5, type: 'number', domain: 'user'}}, rule), undefined);
 
-  t.deepEqual(v.validate({meta: {value: null, type: 'number', domain: 'user'}}, rule), {});
+  t.equal(v.validate({meta: {value: null, type: 'number', domain: 'user'}}, rule), undefined);
 
   t.end();
 });
@@ -122,13 +122,13 @@ test('switch: func switch on nested validation', t => {
     meta: {value: ["must be at least 10"]}
   });
 
-  t.deepEqual(v.validate({meta: {value: null, type: 'number', domain: 'admin'}}, rule), {});
+  t.equal(v.validate({meta: {value: null, type: 'number', domain: 'admin'}}, rule), undefined);
 
-  t.deepEqual(v.validate({meta: {value: 'on', type: 'string', domain: 'user'}}, rule), {});
+  t.equal(v.validate({meta: {value: 'on', type: 'string', domain: 'user'}}, rule), undefined);
 
-  t.deepEqual(v.validate({meta: {value: 5, type: 'number', domain: 'user'}}, rule), {});
+  t.equal(v.validate({meta: {value: 5, type: 'number', domain: 'user'}}, rule), undefined);
 
-  t.deepEqual(v.validate({meta: {value: null, type: 'number', domain: 'user'}}, rule), {});
+  t.equal(v.validate({meta: {value: null, type: 'number', domain: 'user'}}, rule), undefined);
 
   t.end();
 });
@@ -145,12 +145,12 @@ test('switch: switch cases after if', t => {
     }
   };
 
-  t.deepEqual(v.validate({value: 'on', type: 'string', enforce: false}, rule), {});
+  t.equal(v.validate({value: 'on', type: 'string', enforce: false}, rule), undefined);
   t.deepEqual(v.validate({value: 'on', type: 'string', enforce: true}, rule), {
     value: ["must have at least 4 characters"]
   });
 
-  t.deepEqual(v.validate({value: 5, type: 'number', enforce: false}, rule), {});
+  t.equal(v.validate({value: 5, type: 'number', enforce: false}, rule), undefined);
   t.deepEqual(v.validate({value: 5, type: 'number', enforce: true}, rule), {
     value: ["must be at least 10"]
   });

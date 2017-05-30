@@ -8,7 +8,7 @@ const v = new Validation();
 test('password: tests minLength, maxLength', t => {
   let rule = {a: {validate: "password", minLength: 4, maxLength: 8}};
   t.deepEqual(v.validate({a: '02'}, rule), {a: ["must have at least 4 characters"]});
-  t.deepEqual(v.validate({a: '12345'}, rule), {});
+  t.equal(v.validate({a: '12345'}, rule), undefined);
   t.deepEqual(v.validate({a: '123456789'}, rule), {a: ["must be no more than 8 characters"]});
   t.end();
 });
@@ -16,7 +16,7 @@ test('password: tests minLength, maxLength', t => {
 test('password: tests alphabet', t => {
   let rule = {a: {validate: "password", alphabet: true}};
   t.deepEqual(v.validate({a: '02'}, rule), {a: ["must contain alphabet letter"]});
-  t.deepEqual(v.validate({a: '4c5'}, rule), {});
+  t.equal(v.validate({a: '4c5'}, rule), undefined);
   t.end();
 });
 
@@ -24,22 +24,22 @@ test('password: tests mixCase', t => {
   let rule = {a: {validate: "password", mixCase: true}};
   t.deepEqual(v.validate({a: '0'}, rule), {a: ["must contain both lower case and upper case letters"]});
   t.deepEqual(v.validate({a: '0a'}, rule), {a: ["must contain both lower case and upper case letters"]});
-  t.deepEqual(v.validate({a: '4cB5'}, rule), {});
+  t.equal(v.validate({a: '4cB5'}, rule), undefined);
   t.end();
 });
 
 test('password: tests digit', t => {
   let rule = {a: {validate: "password", digit: true}};
-  t.deepEqual(v.validate({a: '0'}, rule), {});
+  t.equal(v.validate({a: '0'}, rule), undefined);
   t.deepEqual(v.validate({a: 'ba'}, rule), {a: ["must contain number"]});
-  t.deepEqual(v.validate({a: '4cB5'}, rule), {});
+  t.equal(v.validate({a: '4cB5'}, rule), undefined);
   t.end();
 });
 
 test('password: tests specialChar', t => {
   let rule = {a: {validate: "password", specialChar: true}};
   t.deepEqual(v.validate({a: 'ba'}, rule), {a: ["must contain special character (like !@$%)"]});
-  t.deepEqual(v.validate({a: '4%5'}, rule), {});
+  t.equal(v.validate({a: '4%5'}, rule), undefined);
   t.end();
 });
 
@@ -52,6 +52,6 @@ test('password: tests all', t => {
     'must contain special character (like !@$%)'
   ]});
   t.deepEqual(v.validate({a: '0abC%--on2'}, rule), {a: ["must be no more than 8 characters"]});
-  t.deepEqual(v.validate({a: '0aC%on2'}, rule), {});
+  t.equal(v.validate({a: '0aC%on2'}, rule), undefined);
   t.end();
 });
