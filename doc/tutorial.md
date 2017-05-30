@@ -9,7 +9,7 @@ In this tutorial, we will show you how to compose a `rule`, from the most basic 
 
 `bcx-validation` makes zero assumption about your `model` (the stuff you want to validate), it can be any Javascript object.
 
-A `model` can be simply a String or Number (or even Function or null/undefined). We will start with most simple `model` to show you the most simple usage of `rule`.
+A `model` can be simply a String or Number (or even Function or null/undefined). We will start with simplest `model` to show you the simplest usage of `rule`.
 
 Let's use term `validator` for an implementation of excuting certain `rule`.
 
@@ -21,16 +21,16 @@ Every `bcx-validation` rule is an object with reserved key `validate`, the value
 
 > Note `isTrue` validator tests truthy of the value, empty string and number zero are false, but empty array/object are true.
 
-> You can extend `bcx-validation` by [adding new validator](#define-new-validator).
+> You can extend `bcx-validation` by adding new validator.
 
 > You might remember in the example showed in [README](../README.md), `"email"`, `"mandatory"` etc do not have the full shape of a rule. They are short-cut, implemented in [transformer](#transformer-rule), the full form of `"email"` is still `{validate: "email"}`.
 
-When it fails, it returns an array of error message (or consistency, even a single error message is wrapped in an array)
+When it fails, it returns an array of error message (for consistency, even a single error message is wrapped in an array).
 
     validation.validate(false, {validate: "isTrue"})
     // => ["must be true"]
 
-When it passes, it returns undefined
+When it passes, it returns undefined.
 
     validation.validate(true, {validate: "isTrue"})
     // => undefined
@@ -39,7 +39,7 @@ When it passes, it returns undefined
 
 #### Override using expression
 
-Instead of testing the current value, you can override the value before it is being judged
+Instead of testing the current value, you can override the value before it is being judged.
 
     validation.validate("lorem", {validate: "isTrue", value: "$value.length >= 8"});
     // => ["must be true"]
@@ -55,7 +55,7 @@ This looks better.
 
 > `value` and `message` are the other two reserved keys in `bcx-validation` rule, it provides override point for value and error message.
 
-> They are the key features to allow us to do [validator composition](#define-new-validator).
+> They are the key features to allow us to do [validator composition](#define-new-validator-with-composition).
 
 Look back on the value override, `"$value.length >= 8"`, this is processed by [bcx-expression-evaluator](https://github.com/buttonwoodcx/bcx-expression-evaluator), which uses exact same syntax as aurelia-binding provides. For users with some aurelia background, `$this` and `$parent` are special context variables you can use inside the expression. `bcx-validation` introduces more special context variables.
 
@@ -82,7 +82,7 @@ In Buttonwoodcx, we mainly use expression. But for most of users, if you don't n
 
 If you are interested on using expression, please read through [bcx-expression-evaluator README](https://github.com/buttonwoodcx/bcx-expression-evaluator).
 
-`bcx-validation` uses [lodash](https://github.com/lodash/lodash) extensively. For convenience, lodash is available as a helper to any expression used in validation rule. So instead of `"$value.length >= 8"`, you can also write `"_.size($value) >= 8"`.
+`bcx-validation` uses [lodash](https://github.com/lodash/lodash) extensively. For convenience, lodash is available as a helper to any expression used in `bcx-validation`. So instead of `"$value.length >= 8"`, you can also write `"_.size($value) >= 8"`.
 
 Let's look back on the message override again, the message you provided is actually evaluated by `bcx-expression-evaluator` in es6 string interpolation mode. `"must be at least 8 characters long"` is actually like es6 `` `must be at least 8 characters long` ``.
 
@@ -109,19 +109,67 @@ Besides expression and function, you can also use regex in value override.
                                   message: "must contain some digits"});
     // => ["must contain some digits"]
 
-when you use regex, it behave as `value => /\d/.test(value)`.
+When you use regex, it behaves as `value => /\d/.test(value)`.
 
-> The reason of supporting regex in value override, is that `bcx-expression-evaluator` doesn't allow regex literal inside expression.
+> The reason of supporting regex in value override, is `bcx-expression-evaluator`'s limitation. It doesn't allow regex literal inside expression.
 
-> When use regex in value override, the returned value is either true or false. It means you only use `isTrue` or `isFalse` validator with regex value override.
+> When use regex in value override, the returned value is either true or false. It means most likely to use `isTrue` or `isFalse` validator with regex value override.
 
-## Raw function as rule (explain shapes of return value)
+> `{validate: "isTrue", value: /regex/, message: "..."}` looks verbose, `bcx-validation` allows you to write `{validate: /regex/, message: "..."}` or simply `/regex/` (if you don't even want to override error message). The short-cuts are implemented in [transformer](#transformer-rule).
 
-### Define new validator from function
+## Raw function as rule
+
+Instead of using standard validators provided by `bcx-validation`, you can supply a raw function as validator.
+
+    const validateLength = value => {
+      if (!(value && value.length >= 8)) {
+        return "must be at least 8 characters long"
+      }
+    };
+
+If value passed your validator, it should return nothing (null/undefined). Otherwise, return a string or array of strings as error message.
+
+    validation.validate("abc", validateLength);
+    // => ["must be at least 8 characters long"]
+
+> This is not the only way a raw validator can return. It could return a shaped result like `{isValid: false, message: "some error", break: true}` for fine control of chain of validators. We will talk about it more in [chain of rules](#chain-of-rules).
+
+> A raw validator can also return a boolean. True means pass, false means fail with default error message "invalid". `validation.validate("abc", v => v && v.length >= 8);` => `["invalid"]`.
+
+### Define new validator with function
+
+Raw function validator is rarely used. It doesn't take any of `bcx-validation`'s advantages. For reusability (and value/message override we saw before), it's better to add a new validator.
+
+    validation.addValidator("atLeast8Chars", value => {
+      if (!(value && value.length >= 8)) {
+        return "must be at least 8 characters long"
+      }
+    });
+
+    validation.validate("abc", {validate: "atLeast8Chars"});
+    // => ["must be at least 8 characters long"]
+
+Now you can use value and error message override.
+
+    validation.validate("name#id_123#mark", {validate: "atLeast8Chars",
+                                             value: "_.split($value, '#')[1]",
+                                             message: "id must be at least 8 characters long"});
+    // => ["id must be at least 8 characters long"]
+
+You can wrap error message over existing error message.
+
+    validation.validate("name#id_123#mark", {validate: "atLeast8Chars",
+                                             value: "_.split($value, '#')[1]",
+                                             message: "id ${_.join($errors, ', ')}"});
+    // => ["id must be at least 8 characters long"]
+
+> `$errors` is a special context variable only within error message override, it represent original array of errors.
+
+> You may noticed the new validator "atLeast8Chars" is quite bad for reusage. It could be better if the min length was passed in as option `{validate: "atLeast", length: 8}`. We will revisit this and show you how to support option in validator function after [validator composition](#define-new-validator-with-composition).
 
 ## Chain of rules
 
-### Define new validator from composition
+### Define new validator with composition
 
 ## Nested rule
 
