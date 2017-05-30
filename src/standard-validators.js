@@ -180,8 +180,8 @@ export const standardTransformers = [
   [forEachTester, forEachTransformer],
 
   // transform regex
-  ["_.isRegExp($this)", rule => ({validate: "isTrue", value: rule})],
-  ["_.isRegExp(validate)", rule => ({validate: "isTrue", value: rule.validate})],
+  ["_.isRegExp($this)", rule => ({validate: "isTrue", value: rule, message: 'invalid format'})],
+  ["_.isRegExp(validate)", rule => ({validate: "isTrue", value: rule.validate, message: 'invalid format'})],
 
   // transform "isBlank"
   ["$this === 'isBlank'", () => ({validate: "isBlank"})],
