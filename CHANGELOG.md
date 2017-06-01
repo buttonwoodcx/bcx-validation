@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.5 - 01/Jun/2017
+
+  * remove try/catch for better performance.
+
 ## 0.2.4 - 22/May/2017
 
   * fix an issue on user defined transformer. Transformers should have higher precedence than all validators.
