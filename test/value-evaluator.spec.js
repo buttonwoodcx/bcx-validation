@@ -22,7 +22,7 @@ _.merge(scope.overrideContext, {
 });
 
 test('valueEvaluator: builds for string', t => {
-  t.throws(() => valueEvaluator(''), 'rejects empty expression');
+  t.equal(valueEvaluator(''), undefined);
 
   let e = valueEvaluator('$value + some');
   t.equal(e(scope), 'abcother');
@@ -57,9 +57,9 @@ test('valueEvaluator: builds for function', t => {
 });
 
 test('valueEvaluator: rejects unknown input', t => {
-  t.throws(() => valueEvaluator(), 'rejects undefined input');
-  t.throws(() => valueEvaluator(null), 'rejects null input');
-  t.throws(() => valueEvaluator([]), 'rejects unknown input');
-  t.throws(() => valueEvaluator({}), 'rejects unknown input');
+  t.equal(valueEvaluator(), undefined);
+  t.equal(valueEvaluator(null), undefined);
+  t.equal(valueEvaluator([]), undefined);
+  t.equal(valueEvaluator({}), undefined);
   t.end();
 });

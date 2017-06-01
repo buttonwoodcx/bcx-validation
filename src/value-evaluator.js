@@ -5,7 +5,7 @@ const parser = new Parser();
 
 export default function (input, opts) {
 
-  if (_.isString(input)) {
+  if (_.isString(input) && _.trim(input).length) {
     const expression = parser.parse(input, opts);
     return scope => expression.evaluate(scope);
   }
@@ -40,5 +40,5 @@ export default function (input, opts) {
     };
   }
 
-  throw new Error(`Unsupported input: ${input}`);
+  // unknown input returns undefined.
 }

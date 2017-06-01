@@ -79,6 +79,7 @@ export const switchTransformer = function (rule, validate) {
 export const forEachTester = function (rule) {
   if (!_.has(rule, 'foreach')) return false;
   if (!_.isEmpty(_.omit(rule, ['foreach', 'key']))) return false;
+  if (rule.key && !_.isString(rule.key) && !_.isFunction(rule.key)) return false;
   return true;
 };
 

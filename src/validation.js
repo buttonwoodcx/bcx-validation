@@ -58,7 +58,8 @@ class Validation {
     }
 
     if (!_.isFunction(validator)) {
-      throw new Error(`Unsupported rule[type=${typeof rule}]: ${JSON.stringify(rule)}`);
+      // Unsupported rule
+      return;
     }
 
     return standardValidatorWrap(validator, {message,
@@ -85,13 +86,10 @@ class Validation {
       // only validatorImp creates scope variation to
       // override $value and options.
       const validator = this._validate(_validator.validatorImp);
-      const value = _.get(rule, 'value', '');
+      const value = _.get(rule, 'value');
       const options = _.omit(rule, ['value', 'validate']);
 
-      let valueEval;
-      try {
-        valueEval = valueEvaluator(value);
-      } catch (e) {}
+      let valueEval = valueEvaluator(value);
 
       if (!valueEval && _.isEmpty(options)) {
         return validator;
@@ -105,7 +103,8 @@ class Validation {
           if (_.endsWith(name, '.bind')) {
             // support binding on option like "maxLength.bind":...
             const trueName = name.substr(0, name.length - 5);
-            variation[`$${trueName}`] = valueEvaluator(v)(scope);
+            const optionEval = valueEvaluator(v);
+            variation[`$${trueName}`] = optionEval && optionEval(scope) || v;
           } else {
             variation[`$${name}`] = v;
           }
@@ -177,45 +176,44 @@ class Validation {
   _validate(rulesMap, inPropertyName) {
     if (_.isUndefined(rulesMap) || _.isNull(rulesMap)) return PASSED;
 
-    try {
-      // try validate the whole model without any nested property validation
-      return this.buildValidator(rulesMap);
+    // try validate the whole model without any nested property validation
+    const validator = this.buildValidator(rulesMap);
 
-    } catch (e) {
-      // try other
-      if (_.isArray(rulesMap)) {
-        // composition of rules
-        const subRules = _.map(rulesMap, r => this._validate(r, inPropertyName));
-        return standardValidatorWrap(validatorChain(subRules));
+    if (validator) return validator;
 
-      } else if (_.isObjectLike(rulesMap)) {
-        // nested rules
-        return standardValidatorWrap(scope => {
-          const errors = {};
-          _.each(rulesMap, (rules, propertyName) => {
-            const path = inPropertyName ? [...inPropertyName, propertyName] : [propertyName];
+    // try other
+    if (_.isArray(rulesMap)) {
+      // composition of rules
+      const subRules = _.map(rulesMap, r => this._validate(r, inPropertyName));
+      return standardValidatorWrap(validatorChain(subRules));
 
-            const value = _.get(valueEvaluator('$this')(scope), path);
-            const neighbourValues = _.map(valueEvaluator('$neighbours')(scope), _.property(path));
-            const localScope = scopeVariation(scope, {
-              $value: value,
-              $propertyPath: path,
-              $neighbourValues: neighbourValues
-            });
+    } else if (_.isObjectLike(rulesMap)) {
+      // nested rules
+      return standardValidatorWrap(scope => {
+        const errors = {};
+        _.each(rulesMap, (rules, propertyName) => {
+          const path = inPropertyName ? [...inPropertyName, propertyName] : [propertyName];
 
-            const result = this._validate(rules, path)(localScope);
-
-            if (result.isValid === false) {
-              errors[propertyName] = result.errors;
-            }
+          const value = _.get(valueEvaluator('$this')(scope), path);
+          const neighbourValues = _.map(valueEvaluator('$neighbours')(scope), _.property(path));
+          const localScope = scopeVariation(scope, {
+            $value: value,
+            $propertyPath: path,
+            $neighbourValues: neighbourValues
           });
 
-          return {isValid: _.isEmpty(errors), errors};
+          const result = this._validate(rules, path)(localScope);
+
+          if (result.isValid === false) {
+            errors[propertyName] = result.errors;
+          }
         });
 
-      } else {
-        throw new Error('Unexpected rules: ' + JSON.stringify(rulesMap));
-      }
+        return {isValid: _.isEmpty(errors), errors};
+      });
+
+    } else {
+      throw new Error('Unexpected rules: ' + JSON.stringify(rulesMap));
     }
   }
 

@@ -1,6 +1,6 @@
 # Tutorial
 
-In this tutorial, we will show you how to compose a `rule`, from the most basic atomic rule to very complex rule. After that we will revisit the example we showed in [README](../README.md), to see what happened there.
+In this tutorial, we will show you how to compose a `rule`, from the most basic atomic rule to very complex rule. We will revisit the example we showed in [README](../README.md), to see what happened there.
 
     import Validation from 'bcx-validation';
     const validation = new Validation();
@@ -23,12 +23,14 @@ Every `bcx-validation` rule is an object with reserved key `validate`, the value
 
 > You can extend `bcx-validation` by adding new validator.
 
-> You might remember in the example showed in [README](../README.md), `"email"`, `"mandatory"` etc do not have the full shape of a rule. They are short-cut, implemented in [transformer](#transformer-rule), the full form of `"email"` is still `{validate: "email"}`.
+> In the example showed in [README](../README.md), `"email"`, `"mandatory"` etc do not have the full shape of a rule. They are shortcuts, implemented in [transformer](#transformer-rule), the full form of `"email"` is still `{validate: "email"}`.
 
-When it fails, it returns an array of error message (for consistency, even a single error message is wrapped in an array).
+When it fails, it returns an array of error message.
 
     validation.validate(false, {validate: "isTrue"})
     // => ["must be true"]
+
+>  For consistency, even a single error message is wrapped in an array.
 
 When it passes, it returns undefined.
 
@@ -37,9 +39,9 @@ When it passes, it returns undefined.
 
 ### Optional value override and message override
 
-#### Override using expression
-
 Instead of testing the current value, you can override the value before it is being judged.
+
+#### Override using expression
 
     validation.validate("lorem", {validate: "isTrue", value: "$value.length >= 8"});
     // => ["must be true"]
@@ -68,11 +70,11 @@ Here `$value` is the first speical context variable that `bcx-validation` makes 
 In Buttonwoodcx, we mainly use expression. But for most of users, if you don't need expression, you can supply function for value override.
 
     validation.validate("lorem", {validate: "isTrue",
-                                  value: value => value.length > 8,
+                                  value: value => value.length >= 8,
                                   message: "must be at least 8 characters long"});
     // => ["must be at least 8 characters long"]
 
-> You might noticed the function we used for value override is not quite safe, when value is null/undefined, the above code raises exception on `value.length`. The safer way is to do `value => value && value.length > 8`.
+> You might noticed the function we used for value override is not quite safe, when value is null/undefined, the above code raises exception on `value.length`. The safer way is to do `value => value && value.length >= 8`.
 
 > While you have to be careful to do not provide functions throws exception, `bcx-expression-evaluator` is quite safe, silent most of the time, `"$value.length >= 8"` never throws exception.
 
@@ -115,7 +117,7 @@ When you use regex, it behaves as `value => /\d/.test(value)`.
 
 > When use regex in value override, the returned value is either true or false. It means most likely to use `isTrue` or `isFalse` validator with regex value override.
 
-> `{validate: "isTrue", value: /regex/, message: "..."}` looks verbose, `bcx-validation` allows you to write `{validate: /regex/, message: "..."}` or simply `/regex/` (if you don't even want to override error message). The short-cuts are implemented in [transformer](#transformer-rule).
+> `{validate: "isTrue", value: /regex/, message: "..."}` looks verbose, `bcx-validation` allows you to write `{validate: /regex/, message: "..."}` or simply `/regex/` (if you don't even want to override error message). The shortcuts are implemented in [transformer](#transformer-rule).
 
 ## Raw function as rule
 
@@ -165,7 +167,7 @@ You can wrap error message over existing error message.
 
 > `$errors` is a special context variable only within error message override, it represent original array of errors.
 
-> You may noticed the new validator "atLeast8Chars" is quite bad for reusage. It could be better if the min length was passed in as option `{validate: "atLeast", length: 8}`. We will revisit this and show you how to support option in validator function after [validator composition](#define-new-validator-with-composition).
+> You might noticed the new validator we defined is quite bad for reusage. It could be better if the min length was passed in as option `{validate: "atLeast", length: 8}`. We will revisit this and show you how to support option in validator function after [validator composition](#define-new-validator-with-composition).
 
 ## Chain of rules
 

@@ -69,3 +69,5 @@ Returned error object.
 Notice `customers` in the error object is not an array, it looks like a sparse array but has no `length` property. Here the `key` of every error is the original index of the item, you can use other thing (like customer id) for the `key` in [`foreach`](https://github.com/buttonwoodcx/bcx-validation/blob/master/doc/tutorial.md#foreach-transformer) validator.
 
 If this looks useful to you, jump to the full [tutorial](https://github.com/buttonwoodcx/bcx-validation/blob/master/doc/tutorial.md).
+
+[BUTTONWOODCX™ PTY LTD](http://www.buttonwood.com.au).
