@@ -234,7 +234,6 @@ test('Validation: validates deep nested object', t => {
   t.end();
 });
 
-
 test('Validation: validates instance of constructor func', t => {
   function Model(a, b) {
     this.a = a;
@@ -282,10 +281,13 @@ test('Validation: can add default helper', t => {
 });
 
 test('Validation: user defined transformer works', t => {
-  v.addTransformer("_.isString(ifNot) && !_.isEmpty(_.omit($this, 'ifNot'))", rule => {
-    const {ifNot, ...others} = rule;
-    return {if: `!(${ifNot})`, ...others};
-  });
+  v.addTransformer(
+    rule => (rule && _.isString(rule.ifNot) && !_.isEmpty(_.omit(rule, 'ifNot'))),
+    rule => {
+      const {ifNot, ...others} = rule;
+      return {if: `!(${ifNot})`, ...others};
+    }
+  );
 
   const rule = {value: {ifNot: "type == 'abc'", validate: "mandatory"}};
 

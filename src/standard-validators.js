@@ -13,6 +13,11 @@ export function isBlank(v) {
   }
 }
 
+export const ifTester = function (rule) {
+  if (!_.has(rule, 'if')) return false;
+  return _.isString(rule.if) && !_.isEmpty(_.omit(rule, 'if'));
+};
+
 export const ifTransformer = function (rule) {
   const _if = _.get(rule, 'if');
   const subRule = _.omit(rule, 'if');
@@ -46,7 +51,7 @@ export const switchTransformer = function (rule, validate) {
 
   const validator = scope => {
     // make a guess whether user try to use nested validation or plain validation
-    const value = valueEvaluator('$value')(scope);
+    const value = scope.overrideContext.$value;
     let nestedPath, _case;
 
     if (_.isObjectLike(value)) {
@@ -99,7 +104,7 @@ export const forEachTransformer = function (rule, validate) {
 
   const validator = scope => {
     let errors = {};
-    const enumerable = valueEvaluator('$value')(scope);
+    const enumerable = scope.overrideContext.$value;
     const length = _.size(enumerable);
     _.each(enumerable, (item, index) => {
       const {overrideContext} = scope;
@@ -155,7 +160,7 @@ export const standardTransformers = [
   //
   // note: 'if' is a reserved word in javascript but not in bcx-expression
   // be less surprising but verbose, write "_.isString($this['if'])"
-  ["_.isString(if) && !_.isEmpty(_.omit($this, 'if'))", ifTransformer],
+  [ifTester, ifTransformer],
 
   // switch
   //
@@ -169,7 +174,7 @@ export const standardTransformers = [
   //
   // note: 'switch' is a reserved word in javascript but not in bcx-expression
   // be less surprising but verbose, write "_.isString($this['switch'])"
-  ["(_.isString(switch) || _.isFunction(switch)) && _.isObjectLike(cases) && _.isEmpty(_.omit($this, 'switch', 'cases'))", switchTransformer],
+  [switchTester, switchTransformer],
 
   // foreach
   //
@@ -181,26 +186,26 @@ export const standardTransformers = [
   [forEachTester, forEachTransformer],
 
   // transform regex
-  ["_.isRegExp($this)", rule => ({validate: "isTrue", value: rule, message: 'invalid format'})],
-  ["_.isRegExp(validate)", rule => ({validate: "isTrue", value: rule.validate, message: 'invalid format'})],
+  [_.isRegExp, rule => ({validate: "isTrue", value: rule, message: 'invalid format'})],
+  [r => _.isRegExp(r && r.validate), rule => ({validate: "isTrue", value: rule.validate, message: 'invalid format'})],
 
   // transform "isBlank"
-  ["$this === 'isBlank'", () => ({validate: "isBlank"})],
+  [r => r === 'isBlank', () => ({validate: "isBlank"})],
 
   // transform "notBlank"
-  ["$this === 'notBlank'", () => ({validate: "notBlank"})],
+  [r => r === 'notBlank', () => ({validate: "notBlank"})],
 
   // transform "mandatory"
-  ["$this === 'mandatory'", () => ({validate: "mandatory"})],
+  [r => r === 'mandatory', () => ({validate: "mandatory"})],
 
   // transform "notMandatory"
-  ["$this === 'notMandatory'", () => ({validate: "notMandatory"})],
+  [r => r === 'notMandatory', () => ({validate: "notMandatory"})],
 
   // transform "email"
-  ["$this === 'email'", () => ({validate: "email"})],
+  [r => r === 'email', () => ({validate: "email"})],
 
   // transform "unique"
-  ["$this === 'unique'", () => ({validate: "unique"})],
+  [r => r === 'unique', () => ({validate: "unique"})],
 ];
 
 export const standardValidators = [
@@ -228,7 +233,7 @@ export const standardValidators = [
 
 
   // all other validators are in form of rewrite or composition
-  ["isFalse", {validate: "isTrue", value: "!$value", message: "must be false"}],
+  ["isFalse", {validate: "isTrue", value: v => !v, message: "must be false"}],
   ["isBlank", {validate: "isTrue", value: isBlank, message: "must be blank"}],
   ["notBlank", {validate: "isFalse", value: isBlank, message: "must not be blank"}],
 
@@ -237,9 +242,9 @@ export const standardValidators = [
 
   // {validate: 'number', integer: true, min: 0, max: 10, greaterThan: 0, lessThan: 10, even: true, /* odd: true */}
   ["number", [
-    {validate: "isTrue", value: "_.isNumber($value)", message: "must be a number", stopValidationChainIfFail: true},
+    {validate: "isTrue", value: v => _.isNumber(v), message: "must be a number", stopValidationChainIfFail: true},
     // option {integer: true}
-    {if: "$integer", validate: "isTrue", value: "_.isInteger($value)", message: "must be an integer", stopValidationChainIfFail: true},
+    {if: "$integer", validate: "isTrue", value: v => _.isInteger(v), message: "must be an integer", stopValidationChainIfFail: true},
     // option {min: aNumber}
     {if: "_.isNumber($min)", validate: "isTrue", value: "$value >= $min", message: "must be at least ${$min}"},
     // option {greaterThan: aNumber}
@@ -249,14 +254,14 @@ export const standardValidators = [
     // option {lessThan: aNumber}
     {if: "_.isNumber($lessThan)", validate: "isTrue", value: "$value < $lessThan", message: "must be less than ${$lessThan}"},
     // option {even: true}
-    {if: "$even", validate: "isTrue", value: "$value % 2 === 0", message: "must be an even number"},
+    {if: "$even", validate: "isTrue", value: v => v % 2 === 0, message: "must be an even number"},
     // option {odd: true}
-    {if: "$odd", validate: "isTrue", value: "$value % 2 === 1", message: "must be an odd number"}
+    {if: "$odd", validate: "isTrue", value: v => v % 2 === 1, message: "must be an odd number"}
   ]],
 
   // {validate: 'string', minLength: 4, maxLength: 8}
   ["string", [
-    {validate: "isTrue", value: "_.isString($value)", message: "must be a string", stopValidationChainIfFail: true},
+    {validate: "isTrue", value: v => _.isString(v), message: "must be a string", stopValidationChainIfFail: true},
     {if: "$minLength", validate: "isTrue", value: "_.size($value) >= $minLength", message: "must have at least ${$minLength} characters"},
     {if: "$maxLength", validate: "isTrue", value: "_.size($value) <= $maxLength", message: "must be no more than ${$maxLength} characters"}
   ]],
@@ -277,21 +282,14 @@ export const standardValidators = [
   ["password", [
     // min/maxLength options would be passed through in scope, do not need explicit passing to string validator
     {validate: 'string'},
-    // {validate: /[a-z]/i} is a shortcut to
-    // {validate: "isTrue", value: /[a-z]/i}
-    {if: '$alphabet', validate: /[a-z]/i, message: 'must contain alphabet letter'},
-    // [/[a-z]/, /[A-Z]/] is a shortcut to
-    // [
-    //   {validate: "isTrue", value: /[a-z]/},
-    //   {validate: "isTrue", value: /[A-Z]/}
-    // ]
-    {if: '$mixCase', group: [/[a-z]/, /[A-Z]/], message: 'must contain both lower case and upper case letters'},
+    {if: '$alphabet', validate: "isTrue", value: /[a-z]/i, message: 'must contain alphabet letter'},
+    {if: '$mixCase', group: [{validate: "isTrue", value: /[a-z]/}, {validate: "isTrue", value: /[A-Z]/}], message: 'must contain both lower case and upper case letters'},
     {if: '$digit', validate: /[0-9]/, message: 'must contain number'},
     {if: '$specialChar', validate: /[!@#$%^&*()\-_=+\[\]{}\\|;:'",<.>\/?]/, message: 'must contain special character (like !@$%)'},
   ]],
 
   // email regex from https://html.spec.whatwg.org/multipage/forms.html#valid-e-mail-address
-  ["email", {validate: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+  ["email", {validate: "isTrue", value: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
              message: "not a valid email"}],
 
   // unique. need to access neighbours

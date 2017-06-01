@@ -69,7 +69,7 @@ class Validation {
 
   resolveValidator(rule) {
     const _transformer = _.find(this._transformers, v => v.test(rule));
-    const _validator = _.find(this._validators, v => v.test(rule));
+    let _validator;
 
     if (_transformer) {
       // transformer
@@ -79,7 +79,11 @@ class Validation {
       } else {
         return this._validate(transformed);
       }
-    } else if (_validator) {
+    } else {
+      _validator = _.find(this._validators, v => v.test(rule));
+    }
+
+    if (_validator) {
       // value & options can only been processed here,
       // As only resolveValidator knows there the rule obj
       // is a validatorImp or transformer,
@@ -117,8 +121,6 @@ class Validation {
         return validator(scopeVariation(scope, variation));
       };
 
-    } else {
-      // ignore
     }
   }
 
@@ -126,8 +128,6 @@ class Validation {
     let testFunc;
     if (_.isFunction(tester)) {
       testFunc = tester;
-    } else if (_.isString(tester)) {
-      testFunc = rule => evaluate(tester, rule, {_});
     } else {
       throw new Error('Invalid transformer tester: ' + tester);
     }
@@ -146,10 +146,10 @@ class Validation {
       throw new Error(`${name} : ${NAME_FORMAT_ERROR}`);
     }
 
-    const tester = `validate === '${name}'`;
+    const tester = r => _.get(r, 'validate') === name;
 
     this._validators.push({
-      test: rule => evaluate(tester, rule, {_}),
+      test: tester,
       validatorImp: imp
     });
   }
@@ -167,7 +167,7 @@ class Validation {
   validate(model, rulesMap, helper = {}) {
     let scope = createSimpleScope(model, {...this.standardHelpers, ...helper});
     // initial $value and $propertyPath
-    _.merge(scope.overrideContext, {$value: model, $propertyPath: ''});
+    _.merge(scope.overrideContext, {$value: model, $propertyPath: null});
 
     const result = this._validate(rulesMap)(scope);
     return result.errors;

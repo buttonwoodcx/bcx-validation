@@ -78,7 +78,7 @@ In Buttonwoodcx, we mainly use expression. But for most of users, if you don't n
 
 > While you have to be careful to do not provide functions throws exception, `bcx-expression-evaluator` is quite safe, silent most of the time, `"$value.length >= 8"` never throws exception.
 
-> The full list of arguments of that function is `function(value, propertyPath, context, neighbours, parentContext)`. We only used the first `value` argument here. `propertyPath` and `context` are useful in [nest rule](#neste-rule), `neighbours` and `parentContext` are useful in [foreach transformer](#foreach-transformer) rule.
+> The full list of arguments of that function is `function(value, propertyPath, context, get)`. We only used the first `value` argument here. `propertyPath` and `context` are useful in [nest rule](#neste-rule), `get` is a function to get arbitary expression value from current scope.
 
 > In `bcx-validation`, no matter what you use function for, (to override value, to define raw validator, to provide a rule factory) they all have that same list of arguments, but there are different requiremnts on return value.
 

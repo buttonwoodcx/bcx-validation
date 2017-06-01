@@ -42,13 +42,13 @@ test('valueEvaluator: builds for regex', t => {
 });
 
 test('valueEvaluator: builds for function', t => {
-  function test(value, propertyPath, context, neighbours, parentContext) {
+  function test(value, propertyPath, context, get) {
     t.equal(value, $value);
     t.equal(propertyPath, $propertyPath);
     t.deepEqual(context, $model);
 
-    t.deepEqual(neighbours, $neighbours);
-    t.equal(parentContext, $parentModel);
+    t.deepEqual(get('$neighbours'), $neighbours);
+    t.equal(get('$parent'), $parentModel);
     t.end();
   }
 

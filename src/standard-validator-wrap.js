@@ -9,9 +9,17 @@ export default function (validator, opts = {}) {
          stopValidationChainIfPass,
          stopValidationChainIfFail} = opts;
 
-  const messageEvaluator = message ?
-                           valueEvaluator(message, {stringInterpolationMode: true}) :
-                           null;
+  let messageEvaluator;
+
+  if (message) {
+    if (_.indexOf(message, '$') >= 0) {
+      messageEvaluator = valueEvaluator(message, {stringInterpolationMode: true});
+    } else {
+      // no need interpolation
+      messageEvaluator = () => message;
+    }
+  }
+
   return scope => {
     let result = new ValidationResult(validator(scope));
     const forceBreak = (result.isValid === true && stopValidationChainIfPass) ||
