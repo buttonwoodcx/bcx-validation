@@ -144,9 +144,12 @@ export const forEachTransformer = function (rule, validate) {
   return validator;
 };
 
-// The order of transformers and validators is very important.
-// It is the order that resolveValidator finds a match.
-export const standardTransformers = [
+export function config (validation) {
+
+// Transformers
+
+  // The order of transformers and validators is very important.
+  // It is the order that resolveValidator finds a match.
 
   // if a rule contains {if: 'expression'}
   // transform it into a chain of validators
@@ -160,7 +163,7 @@ export const standardTransformers = [
   //
   // note: 'if' is a reserved word in javascript but not in bcx-expression
   // be less surprising but verbose, write "_.isString($this['if'])"
-  [ifTester, ifTransformer],
+  validation.addTransformer(ifTester, ifTransformer);
 
   // switch
   //
@@ -174,7 +177,7 @@ export const standardTransformers = [
   //
   // note: 'switch' is a reserved word in javascript but not in bcx-expression
   // be less surprising but verbose, write "_.isString($this['switch'])"
-  [switchTester, switchTransformer],
+  validation.addTransformer(switchTester, switchTransformer);
 
   // foreach
   //
@@ -183,65 +186,65 @@ export const standardTransformers = [
   //   key: optional key expression or function
   // }
   //
-  [forEachTester, forEachTransformer],
+  validation.addTransformer(forEachTester, forEachTransformer);
 
   // transform regex
-  [_.isRegExp, rule => ({validate: "isTrue", value: rule, message: 'invalid format'})],
-  [r => _.isRegExp(r && r.validate), rule => ({validate: "isTrue", value: rule.validate, message: 'invalid format'})],
+  validation.addTransformer(
+    _.isRegExp,
+    rule => ({validate: "isTrue", value: rule, message: 'invalid format'})
+  );
 
-  // transform "isBlank"
-  [r => r === 'isBlank', () => ({validate: "isBlank"})],
-
-  // transform "notBlank"
-  [r => r === 'notBlank', () => ({validate: "notBlank"})],
-
-  // transform "mandatory"
-  [r => r === 'mandatory', () => ({validate: "mandatory"})],
-
-  // transform "notMandatory"
-  [r => r === 'notMandatory', () => ({validate: "notMandatory"})],
-
-  // transform "email"
-  [r => r === 'email', () => ({validate: "email"})],
-
-  // transform "unique"
-  [r => r === 'unique', () => ({validate: "unique"})],
-];
-
-export const standardValidators = [
-  //validators implemented in func
-  ["isTrue", v => v ? null : "must be true"],
-
-  ["passImmediatelyIf", v => v ?
-                             // stop the chain if passed
-                             {isValid: true, break: true} :
-                             // continue, never fail
-                             null],
-
-  ["skipImmediatelyIf", v => v ?
-                             // skip rest if passed
-                             // isValid is not true, but null
-                             {isValid: null, break: true} :
-                             // continue, never fail
-                             null],
-
-  ["failImmediatelyIf", v => v ?
-                             // stop the chain if failed
-                             {isValid: false, break: true} :
-                             // continue
-                             null],
+  validation.addTransformer(
+    r => _.isRegExp(r && r.validate),
+    rule => ({validate: "isTrue", value: rule.validate, message: 'invalid format'})
+  );
 
 
-  // all other validators are in form of rewrite or composition
-  ["isFalse", {validate: "isTrue", value: v => !v, message: "must be false"}],
-  ["isBlank", {validate: "isTrue", value: isBlank, message: "must be blank"}],
-  ["notBlank", {validate: "isFalse", value: isBlank, message: "must not be blank"}],
+// Validators
 
-  ["mandatory", {validate: "failImmediatelyIf", value: isBlank, message: "must not be empty"}],
-  ["notMandatory", {validate: "skipImmediatelyIf", value: isBlank}],
+  // validators implemented in functions.
+
+  validation.addValidator("isTrue", v => v ? null : "must be true");
+  validation.addValidator("isFalse", v => v ? "must be false" : null);
+
+  validation.addValidator(
+    "passImmediatelyIf",
+    v => v ?
+    // stop the chain if passed
+    {isValid: true, break: true} :
+    // continue, never fail
+    null
+  );
+
+  validation.addValidator(
+    "skipImmediatelyIf",
+    v => v ?
+    // skip rest if passed
+    // isValid is not true, but null
+    {isValid: null, break: true} :
+    // continue, never fail
+    null
+  );
+
+  validation.addValidator(
+    "failImmediatelyIf",
+    v => v ?
+    // stop the chain if failed
+    {isValid: false, break: true} :
+    // continue
+    null
+  );
+
+  // all other validators are in form of composition.
+
+  validation.addValidator("isBlank", {validate: "isTrue", value: isBlank, message: "must be blank"});
+  validation.addValidator("notBlank", {validate: "isFalse", value: isBlank, message: "must not be blank"});
+
+  validation.addValidator("mandatory", {validate: "failImmediatelyIf", value: isBlank, message: "must not be empty"});
+  validation.addValidator("notMandatory", {validate: "skipImmediatelyIf", value: isBlank});
 
   // {validate: 'number', integer: true, min: 0, max: 10, greaterThan: 0, lessThan: 10, even: true, /* odd: true */}
-  ["number", [
+  validation.addValidator("number", [
     {validate: "isTrue", value: v => _.isNumber(v), message: "must be a number", stopValidationChainIfFail: true},
     // option {integer: true}
     {if: "$integer", validate: "isTrue", value: v => _.isInteger(v), message: "must be an integer", stopValidationChainIfFail: true},
@@ -257,55 +260,43 @@ export const standardValidators = [
     {if: "$even", validate: "isTrue", value: v => v % 2 === 0, message: "must be an even number"},
     // option {odd: true}
     {if: "$odd", validate: "isTrue", value: v => v % 2 === 1, message: "must be an odd number"}
-  ]],
+  ]);
 
   // {validate: 'string', minLength: 4, maxLength: 8}
-  ["string", [
+  validation.addValidator("string", [
     {validate: "isTrue", value: v => _.isString(v), message: "must be a string", stopValidationChainIfFail: true},
     {if: "$minLength", validate: "isTrue", value: "_.size($value) >= $minLength", message: "must have at least ${$minLength} characters"},
     {if: "$maxLength", validate: "isTrue", value: "_.size($value) <= $maxLength", message: "must be no more than ${$maxLength} characters"}
-  ]],
+  ]);
 
   // {validate: 'within', items: [ ... ]}
-  ["within", {validate: "isTrue", value: "_.includes($items, $value)", message: "must be one of ${_.join($items, ', ')}"}],
+  validation.addValidator("within", {validate: "isTrue", value: "_.includes($items, $value)", message: "must be one of ${_.join($items, ', ')}"});
 
   // {validate: 'notIn', items: [ ... ]}
-  ["notIn", {validate: "isFalse", value: "_.includes($items, $value)", message: "must not be one of ${_.join($items, ', ')}"}],
+  validation.addValidator("notIn", {validate: "isFalse", value: "_.includes($items, $value)", message: "must not be one of ${_.join($items, ', ')}"});
 
   // {validate: 'contain', item: obj, /* or items: [...] */}
-  ["contain", [
+  validation.addValidator("contain", [
     {if: "$item", validate: "isTrue", value: "_.includes($value, $item)", message: "must contain ${$item}"},
     {if: "$items", validate: "isBlank", value: "_.difference($items, $value)", message: "missing ${_.difference($items, $value).join(', ')}"},
-  ]],
+  ]);
 
   // {validate: 'password', minLength: 4, maxLength: 8, alphabet: true, mixCase: true, digit: true, specialChar: true}
-  ["password", [
+  validation.addValidator("password", [
     // min/maxLength options would be passed through in scope, do not need explicit passing to string validator
     {validate: 'string'},
     {if: '$alphabet', validate: "isTrue", value: /[a-z]/i, message: 'must contain alphabet letter'},
     {if: '$mixCase', group: [{validate: "isTrue", value: /[a-z]/}, {validate: "isTrue", value: /[A-Z]/}], message: 'must contain both lower case and upper case letters'},
     {if: '$digit', validate: /[0-9]/, message: 'must contain number'},
     {if: '$specialChar', validate: /[!@#$%^&*()\-_=+\[\]{}\\|;:'",<.>\/?]/, message: 'must contain special character (like !@$%)'},
-  ]],
+  ]);
 
   // email regex from https://html.spec.whatwg.org/multipage/forms.html#valid-e-mail-address
-  ["email", {validate: "isTrue", value: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
-             message: "not a valid email"}],
+  validation.addValidator("email", {validate: "isTrue", value: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+             message: "not a valid email"});
 
   // unique. need to access neighbours
   // option items is evaluated from current scope
   // neighbours could be simple value (when no propertyPath)
-  ["unique", {validate: "notIn", "items.bind": "$neighbourValues", message: "must be unique"}],
-];
-
-export function config (validation) {
-  _.each(standardTransformers, pair => {
-    const [tester, transformer] = pair;
-    validation.addTransformer(tester, transformer);
-  });
-
-  _.each(standardValidators, pair => {
-    const [name, imp] = pair;
-    validation.addValidator(name, imp);
-  });
+  validation.addValidator("unique", {validate: "notIn", "items.bind": "$neighbourValues", message: "must be unique"});
 }

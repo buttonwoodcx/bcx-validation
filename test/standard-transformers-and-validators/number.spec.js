@@ -5,7 +5,7 @@ import _ from 'lodash';
 const v = new Validation();
 
 test('number: tests number', t => {
-  let rule = {a: {validate: "number"}};
+  let rule = {a: "number"};
   t.deepEqual(v.validate({a: "1"}, rule), {a: ["must be a number"]});
   t.equal(v.validate({a: 1}, rule), undefined);
   t.equal(v.validate({a: 1.2}, rule), undefined);

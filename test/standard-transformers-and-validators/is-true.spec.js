@@ -5,7 +5,7 @@ import _ from 'lodash';
 const v = new Validation();
 
 test('isTrue: validates isTrue', t => {
-  let rule = {a: {validate: "isTrue"}};
+  let rule = {a: "isTrue"};
   t.equal(v.validate({a: true}, rule), undefined);
   t.deepEqual(v.validate({a: false}, rule), {a: ['must be true']});
 

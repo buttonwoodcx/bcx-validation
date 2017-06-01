@@ -7,7 +7,7 @@ const v = new Validation();
 test('passImmediatelyIf: pass immediately', t => {
   let rule = {
     a: [
-      {validate: 'passImmediatelyIf'},
+      'passImmediatelyIf',
       {validate: /^good/, message: 'not good :-('}
     ]
   };
@@ -33,7 +33,7 @@ test('passImmediatelyIf: pass immediately', t => {
 test('skipImmediatelyIf: skip immediately', t => {
   let rule = {
     a: [
-      {validate: 'skipImmediatelyIf'},
+      'skipImmediatelyIf',
       {validate: /^good/, message: 'not good :-('}
     ]
   };

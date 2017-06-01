@@ -1,4 +1,4 @@
-import {evaluate, createSimpleScope} from 'bcx-expression-evaluator';
+import {createSimpleScope} from 'bcx-expression-evaluator';
 import valueEvaluator from './value-evaluator';
 import scopeVariation from './scope-variation';
 import validatorChain from './validator-chain';
@@ -17,7 +17,7 @@ class Validation {
     this._validate = this._validate.bind(this);
 
     this._transformers = [];
-    this._validators = [];
+    this._validators = {};
 
     this.standardHelpers = {};
     this.withStandardValidators();
@@ -68,8 +68,10 @@ class Validation {
   }
 
   resolveValidator(rule) {
-    const _transformer = _.find(this._transformers, v => v.test(rule));
-    let _validator;
+    const isAlias = _.isString(rule);
+
+    const _transformer = !isAlias && _.find(this._transformers, v => v.test(rule));
+    let _validator = isAlias && this._validators[rule];
 
     if (_transformer) {
       // transformer
@@ -79,17 +81,18 @@ class Validation {
       } else {
         return this._validate(transformed);
       }
-    } else {
-      _validator = _.find(this._validators, v => v.test(rule));
+    } else if (!_validator) {
+      const name = _.get(rule, 'validate');
+      if (_.isString(name)) _validator = this._validators[name];
     }
 
     if (_validator) {
       // value & options can only been processed here,
       // As only resolveValidator knows there the rule obj
-      // is a validatorImp or transformer,
-      // only validatorImp creates scope variation to
+      // is a validator or transformer,
+      // only validator creates scope variation to
       // override $value and options.
-      const validator = this._validate(_validator.validatorImp);
+      const validator = this._validate(_validator);
       const value = _.get(rule, 'value');
       const options = _.omit(rule, ['value', 'validate']);
 
@@ -148,10 +151,7 @@ class Validation {
 
     const tester = r => _.get(r, 'validate') === name;
 
-    this._validators.push({
-      test: tester,
-      validatorImp: imp
-    });
+    this._validators[name] = imp;
   }
 
   addHelper(name, helper) {

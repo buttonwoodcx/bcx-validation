@@ -5,7 +5,7 @@ import _ from 'lodash';
 const v = new Validation();
 
 test('string: tests sring', t => {
-  let rule = {a: {validate: "string"}};
+  let rule = {a: "string"};
   t.deepEqual(v.validate({a: 0}, rule), {a: ["must be a string"]});
   t.equal(v.validate({a: '0'}, rule), undefined);
   t.end();

@@ -295,3 +295,31 @@ test('Validation: user defined transformer works', t => {
   t.deepEqual(v.validate({type: 'xyz', value: ''}, rule), {value: ["must not be empty"]});
   t.end();
 });
+
+test('Validation: user defined validator', t => {
+  v.addValidator(
+    "allowNA",
+    {validate: "skipImmediatelyIf", value: "$value == 'NA'"}
+  );
+
+  const rule = {
+    value: ['allowNA', {validate: "within", items: ["A", "B"]}]
+  };
+
+  t.equal(v.validate({value: 'NA'}, rule), undefined);
+  t.deepEqual(v.validate({value: 'C'}, rule), {value: ["must be one of A, B"]});
+  t.end();
+});
+
+test('Validation: user defined validator can overwrite existing validator', t => {
+  v.addValidator(
+    "isTrue",
+    v => v ? null : "--not-true--"
+  );
+
+  const rule = {a: "isTrue"};
+
+  t.equal(v.validate({a: true}, rule), undefined);
+  t.deepEqual(v.validate({a: false}, rule), {a: ["--not-true--"]});
+  t.end();
+});

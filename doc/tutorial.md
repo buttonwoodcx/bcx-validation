@@ -21,10 +21,6 @@ Every `bcx-validation` rule is an object with reserved key `validate`, the value
 
 > Note `isTrue` validator tests truthy of the value, empty string and number zero are false, but empty array/object are true.
 
-> You can extend `bcx-validation` by adding new validator.
-
-> In the example showed in [README](../README.md), `"email"`, `"mandatory"` etc do not have the full shape of a rule. They are shortcuts, implemented in [transformer](#transformer-rule), the full form of `"email"` is still `{validate: "email"}`.
-
 When it fails, it returns an array of error message.
 
     validation.validate(false, {validate: "isTrue"})
@@ -118,6 +114,15 @@ When you use regex, it behaves as `value => /\d/.test(value)`.
 > When use regex in value override, the returned value is either true or false. It means most likely to use `isTrue` or `isFalse` validator with regex value override.
 
 > `{validate: "isTrue", value: /regex/, message: "..."}` looks verbose, `bcx-validation` allows you to write `{validate: /regex/, message: "..."}` or simply `/regex/` (if you don't even want to override error message). The shortcuts are implemented in [transformer](#transformer-rule).
+
+#### Shortcut
+
+When you don't need to override either value or error message. You can use the bare validator name as shortcut.
+
+    validation.validate(false, "isTrue")
+    // => ["must be true"]
+
+> In the example showed in [README](../README.md), `"email"`, `"mandatory"` etc do not have the full shape of a rule. They are shortcuts, the full form of `"email"` is still `{validate: "email"}`.
 
 ## Raw function as rule
 
