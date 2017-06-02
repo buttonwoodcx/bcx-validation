@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.6 - 02/Jun/2017
+
+  * refactor validators implementation. im
+
 ## 0.2.5 - 01/Jun/2017
 
   * remove try/catch for better performance.
