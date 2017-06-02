@@ -1,8 +1,12 @@
 # Changelog
 
+## 0.2.7 - 02/Jun/2017
+
+  * update bcx-expression-evaluator for bug fix.
+
 ## 0.2.6 - 02/Jun/2017
 
-  * refactor validators implementation. im
+  * refactor validators implementation. improve performance, allow overwrite existing validator.
 
 ## 0.2.5 - 01/Jun/2017
 
