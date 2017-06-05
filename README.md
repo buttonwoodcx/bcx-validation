@@ -14,59 +14,79 @@ Why not just use some existing validation tool?
 
 The entry is designed as a class instead of a function, in order to allow user to add more validator implementations and helpers to the tool before validating the model.
 
-    import Validation from 'bcx-validation';
-    const validation = new Validation();
+```javascript
+import Validation from 'bcx-validation';
+const validation = new Validation();
+```
 
 The rule.
 
-    const rule = {
-      name: "mandatory",
-      customers: {
-        foreach: {
-          email: "email",
-          name: ["mandatory", "unique"],
-          age: ["notMandatory", {validate: "number",
-                                 "min.bind": "ageLimit",
-                                 message: "${$parent.name} must be at least ${ageLimit} years old"}]
-        }
-      }
-    };
+```javascript
+const rule = {
+  name: "mandatory",
+  customers: {
+    foreach: {
+      email: "email",
+      name: ["mandatory", "unique"],
+      age: ["notMandatory", {validate: "number",
+                             "min.bind": "ageLimit",
+                             message: "${$parent.name} must be at least ${ageLimit} years old"}]
+    }
+  }
+};
+```
 
 Notice we use [bcx-expression-evaluator](https://github.com/buttonwoodcx/bcx-expression-evaluator) in `number` validator's `min` option and error `message` override.
 
 The model object.
 
-    const model = {
-      name: 'driver group',
-      ageLimit: 21,
-      customers: [
-        {name: 'Arm', email: 'arm@test.com'},
-        {name: 'Bob', email: 'bob@test.com'},
-        {name: 'Bob', email: 'bob', age: 15},
-        {name: '', age: 18}
-      ]
-    };
+```javascript
+const model = {
+  name: 'driver group',
+  ageLimit: 21,
+  customers: [
+    {name: 'Arm', email: 'arm@test.com'},
+    {name: 'Bob', email: 'bob@test.com'},
+    {name: 'Bob', email: 'bob', age: 15},
+    {name: '', age: 18}
+  ]
+};
+```
 
 Validate it.
 
-    validation.validate(model, rule);
+```javascript
+validation.validate(model, rule);
+```
 
 Or generate a function that can be used repeatedly. Following two line do the same thing.
 
-    const validate = validation.generateValidator(rule);
-    validate(model);
+```javascript
+const validate = validation.generateValidator(rule);
+validate(model);
+```
 
 Returned error object.
 
-    {
-      customers: {
-        "1": {name: ["must be unique"]},
-        "2": {name: ["must be unique"], email:["not a valid email"], age: ["driver group must be at least 21 years old"]},
-        "3": {name: ["must not be empty"], email:["not a valid email"], age: ["driver group must be at least 21 years old"]}
-      }
+```javascript
+{
+  customers: {
+    "1": {name: ["must be unique"]},
+    "2": {
+      name: ["must be unique"],
+      email:["not a valid email"],
+      age: ["driver group must be at least 21 years old"]
+    },
+    "3": {
+      name: ["must not be empty"],
+      email:["not a valid email"],
+      age: ["driver group must be at least 21 years old"]
     }
+  }
+}
+```
 
-Notice `customers` in the error object is not an array, it looks like a sparse array but has no `length` property. Here the `key` of every error is the original index of the item, you can use other thing (like customer id) for the `key` in [`foreach`](https://github.com/buttonwoodcx/bcx-validation/blob/master/doc/tutorial.md#foreach-transformer) validator.
+Note `customers` in the error object is not an array, it looks like a sparse array but has no `length` property. Here the `key` of every error is the original index of the item, you can use other thing (like customer id) for the `key` in [`foreach`](https://github.com/buttonwoodcx/bcx-validation/blob/master/doc/tutorial.md#foreach-transformer) validator.
 
 If this looks useful to you, jump to the full [tutorial](https://github.com/buttonwoodcx/bcx-validation/blob/master/doc/tutorial.md).
 
