@@ -161,8 +161,6 @@ export function config (validation) {
   // single form:
   //   {if: 'expression', validate: 'name', ...}
   //
-  // note: 'if' is a reserved word in javascript but not in bcx-expression
-  // be less surprising but verbose, write "_.isString($this['if'])"
   validation.addTransformer(ifTester, ifTransformer);
 
   // switch
@@ -175,8 +173,6 @@ export function config (validation) {
   //   }
   // }
   //
-  // note: 'switch' is a reserved word in javascript but not in bcx-expression
-  // be less surprising but verbose, write "_.isString($this['switch'])"
   validation.addTransformer(switchTester, switchTransformer);
 
   // foreach
@@ -297,6 +293,5 @@ export function config (validation) {
 
   // unique. need to access neighbours
   // option items is evaluated from current scope
-  // neighbours could be simple value (when no propertyPath)
   validation.addValidator("unique", {validate: "notIn", "items.bind": "$neighbourValues", message: "must be unique"});
 }
