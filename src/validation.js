@@ -93,6 +93,8 @@ class Validation {
       // only validator creates scope variation to
       // override $value and options.
       const validator = this._validate(_validator);
+      if (isAlias) return validator;
+
       const value = _.get(rule, 'value');
       const options = _.omit(rule, ['value', 'validate']);
 
