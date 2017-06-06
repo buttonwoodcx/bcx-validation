@@ -257,7 +257,7 @@ Here the first validation checks if value is `"NA"`, stop the validation chain i
 Since chain of rules is considered a rule, you can use sub-chain inside a chain. Beware early break of sub-chain doesn't affect the outer chain. Here the last rule was still checked after early break in previous sub-chain.
 
 ```javascript
-rule = [
+var rule = [
   {validate: "passImmediatelyIf", value: "$value == 'NA'"},
   {validate: "failImmediatelyIf", value: "_.isEmpty($value)", message: "must not be empty"},
   [
@@ -302,7 +302,7 @@ You can see we will rarely use `skipImmediatelyIf` directly, `if` transformer do
 `if` transformer can wrap chain of rules too. Here is a rewrite of the previous chain rule.
 
 ```javascript
-rule = {
+var rule = {
   if: "$value != 'NA'",
   group: [
     // 'mandatory' validator is almost same as {validate: "failImmediatelyIf", value: "_.isEmpty($value)", message: "must not be empty"},
@@ -449,9 +449,96 @@ If you use special option name "min.bind", instead of using string "ageLimit" as
 
 ## Nested rule
 
+```javascript
+var rule = {
+  name: ["mandatory", {validate: /^[A-Z]/, message: "must start with capitial letter"}],
+  age: ["notMandatory", {validate: "number", min: 16}]
+};
+
+validation.validate({name: "", age: 18}, rule);
+// => { name: [ 'must not be empty' ] }
+
+validation.validate({name: "bob"}, rule);
+// => { name: [ 'must start with capitial letter' ] }
+
+validation.validate({name: "Bob", age: 12}, rule);
+// => { age: [ 'must be at least 16' ] }
+
+validation.validate({name: "bob", age: 12}, rule);
+// => { name: [ 'must start with capitial letter' ], age: [ 'must be at least 16' ] }
+```
+
+As expected, the result is nested too.
+
+Since a nested rule is considered a rule, you can put it in a chain.
+
+```javascript
+validation.validate({name: "bob", age: 12}, [rule]);
+// => { name: [ 'must start with capitial letter' ], age: [ 'must be at least 16' ] }
+```
+
+You can chain two nested rule together, `bcx-validation` takes care of merging result.
+
+```javascript
+validation.validate({name: "", age: 12}, [
+  {
+    name: ["mandatory"]
+  },
+  {
+    name: ["mandatory", {validate: /^[A-Z]/, message: "must start with capitial letter"}],
+    age: ["notMandatory", {validate: "number", min: 16}]
+  }
+]);
+// => { name: [ 'must not be empty' ], age: [ 'must be at least 16' ] }
+```
+
+> Note `bcx-validation` avoided the duplication of error message "must not be empty" on property "name".
+
+> The chain of nested rule looks odd. But imaging in your app, you have validation rules contributed by two or more sub-systems, instead of merging validation rule together, you can just stack them as a chain, `bcx-validation` will make sure the result is perfectly merged without any duplication.
+
 ## Transformer rule
 
-### Define alias
+`bcx-validation` uses transformer to simplify the shape of the rule. You will rarely need to define a new transformer. But if you understand it, a new type of transformer can provide you maxium flexibility.
+
+We have learnt `if` transformer in conditional validation. Let's define a new `ifNot` transformer by reusing `if` transformer.
+
+```javascript
+const ifNotTester = rule => (rule && _.isString(rule.ifNot) && !_.isEmpty(_.omit(rule, 'ifNot')));
+
+validation.addTransformer(
+  ifNotTester,
+  rule => {
+    const {ifNot, ...others} = rule;
+    return {if: `!(${ifNot})`, ...others};
+  }
+);
+```
+
+The first argument for addTransformer is a tester function, it tests whether a rule can be processed by `ifNot` transformer. You would like to design the tester as defensive as possible to avoid false hit.
+
+The sencond argument is the transformer function itself, with the rule as input, return a transformed rule object as output. Here we rewrite the rule with `if` transformer.
+
+> When `bcx-validation` resolves a rule, it recursively expands into understandable validators. Here the output of `ifNot` transformer is another rule need to be transformed by `if` transformer. There is no limit of the depth of the resolution, as long as your transformers/validators design did not end up in infinite loop.
+
+Here is another example of transformer. This is how we support bare regex as validation rule.
+
+```javascript
+validation.validate('ab', /[A-Z]/); // => ['invalid format']
+
+// implemented by this transformer
+// copied from standard-validators.js
+// transform regex
+validation.addTransformer(
+  _.isRegExp,
+  rule => ({validate: "isTrue", value: rule, message: 'invalid format'})
+);
+```
+
+In summary, for flexibility, we use transformer to accept rule not matching the shape requirement (`{validate: "validatorName", ...}`). Have a look of all the transformers defined in [standard validators](../src/standard-validators.js), you should able to understand all of them except `switch` and `foreach` transformers.
+
+> When `bcx-validation` resolves a rule, it tests against all transformers before trying any validator implementations. That's how `{if: 'condition', validate: 'isTrue'}` is processed by `if` transformer first. If `bcx-validation` tries validators before transformers, `{if: 'condition', validate: 'isTrue'}` will be wrongly treated as "isTrue" validator with option "if" with static value "condition".
+
+> `switch` and `foreach` transformers are different, they are "readyToUse" transformer. As for now, we would not document how to implement a "readyToUse" transformer, it involves understanding how `bcx-validation` internally uses aurelia-binding scope. We will just document the usage of `switch` and `foreach` transformers, they are quite useful.
 
 ### switch transformer
 
