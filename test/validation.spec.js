@@ -311,6 +311,22 @@ test('Validation: user defined validator', t => {
   t.end();
 });
 
+test('Validation: user defined validator with function can access option', t => {
+  v.addValidator("atLeast", (value, propertyPath, context, get) => {
+    console.log(JSON.stringify(get("$length")));
+    const length = get("$length") || 8; // default to 8
+
+    if (!(value && value.length >= length)) {
+      return `must be at least ${length} characters long`;
+    }
+  });
+
+  t.deepEqual(v.validate("abc", "atLeast"), ["must be at least 8 characters long"]);
+  t.equal(v.validate("abc", {validate: "atLeast", length: 2}), undefined);
+  t.deepEqual(v.validate("a", {validate: "atLeast", length: 2}), ["must be at least 2 characters long"]);
+  t.end();
+});
+
 test('Validation: user defined validator can overwrite existing validator', t => {
   v.addValidator(
     "isTrue",

@@ -108,7 +108,8 @@ class Validation {
       return scope => {
         let variation = {};
         // prefix option name with $ in scope to reduce chance of conflict
-        _.each(options, (v, name) => {
+
+        _.forOwn(options, (v, name) => {
           if (_.endsWith(name, '.bind')) {
             // support binding on option like "maxLength.bind":...
             const trueName = name.substr(0, name.length - 5);
