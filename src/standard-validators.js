@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {createSimpleScope, createOverrideContext} from 'bcx-expression-evaluator';
+import {createOverrideContext} from 'bcx-expression-evaluator';
 import valueEvaluator from './value-evaluator';
 
 export function isBlank(v) {
