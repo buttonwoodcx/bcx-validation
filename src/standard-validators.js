@@ -6,8 +6,6 @@ export function isBlank(v) {
   if (_.isNull(v) || _.isUndefined(v) || _.isNaN(v)) return true;
   if (_.isString(v)) {
     if (_.trim(v).length === 0) return true;
-  } else if (_.isNumber(v)) {
-    return false;
   } else if (_.isArray(v) || _.isPlainObject(v)) {
     if (_.isEmpty(v)) return true;
   }
