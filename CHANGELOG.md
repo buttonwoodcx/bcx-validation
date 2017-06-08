@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.9 - 08/Jun/2017
+
+  * documentation.
+
 ## 0.2.8 - 06/Jun/2017
 
   * fixed a bug on option like {length: 2}, use `_.forOwn` not `_.each`.
