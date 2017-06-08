@@ -88,7 +88,7 @@ validation.validate("lorem", {validate: "isTrue",
 
 > While you have to be careful to do not provide functions throws exception, `bcx-expression-evaluator` is quite safe, silent most of the time, `"$value.length >= 8"` never throws exception.
 
-> The full list of arguments of that function is `function(value, propertyPath, context, get)`. We only used the first `value` argument here. `propertyPath` and `context` are useful in [nest rule](#neste-rule), `get` is a function to get arbitary expression value from current scope. In `bcx-validation`, no matter what you use function for, (to override value, to define raw validator, to provide a rule factory) they all have that same list of arguments, but there are different requiremnts on return value.
+> The full list of arguments of that function is `function(value, propertyPath, context, get)`. We only used the first `value` argument here. `propertyPath` and `context` are useful in [nest rule](#nested-rule), `get` is a function to get arbitary expression value from current scope. In `bcx-validation`, no matter what you use function for, (to override value, to define raw validator, to provide a rule factory) they all have that same list of arguments, but there are different requiremnts on return value.
 
 If you are interested on using expression, please read through [bcx-expression-evaluator README](https://github.com/buttonwoodcx/bcx-expression-evaluator).
 
@@ -334,7 +334,7 @@ validation.addValidator(
 validation.validate(true, "isFalse"); // => [ 'false is what I want' ]
 ```
 
-Value override and error message override works.
+Value override and error message override still work.
 
 ```javascript
 validation.validate("hello", {validate: "isFalse", value: "$value.length > 4", message: "cannot be longer than 4 chars"});
