@@ -632,6 +632,8 @@ validation.validate(model, rule);
 
 > Note since the id "ab" is not unique, the error only appears once. If you don't use `key: "id"` error key override, the error will appears twice, one on "1", another on "2".
 
+> key uses expression or function. Produced result must be a string.
+
 #### Special context variables introduced by foreach
 
 Undernearth, for every item in the model array, `foreach` transformer creates new override context (aurelia-binding concept) and add few special context variables.
@@ -932,13 +934,51 @@ var rule = {
 };
 ```
 
+## Add helper for expression
+
+`bcx-validation` by default adds lodash as a helper to `bcx-expression-evaluator`, so you can use lodash in all expressions.
+
+You can add your own helper.
+
+```javascript
+validation.addHelper('sum', (a, b) => a + b);
+
+var rule = {
+  a: {
+    validate: 'isTrue',
+    value: 'sum($value, b) > 10',
+    message: "sum(${sum($value,b)}) is not more than 10"
+  }
+};
+
+validation.validate({a: 2, b: 3}, rule);
+// => { a: ["sum(5) is not more than 10"] }
+```
+
+That was a trivial example. Here is a more useful example.
+
+```javascript
+var model = {
+  customers: [
+    {id: 'c1', name: 'A', friendIds: ['c3', 'c4']},
+    {id: 'c2', name: 'B', friendIds: []},
+    {id: 'c3', name: 'C', friendIds: ['c1']},
+    {id: 'c4', name: 'D', friendIds: ['c1']},
+  ]
+};
+
+validation.addHelper('customerOf', (id) => _.find(model.customers, {id}));
+```
+
+Then you can use `customerOf(a_id)` in any expression. For instance, on any property of a customer, you can do `"_(friendIds).map(customerOf).map('name').value()"` to get all friends' names for that customer.
+
 ## Summary
 
 Since atomic rule, chain rule, nested rule, and transformers are treated generically as rule, they can be composed together in all sorts of ways.
 
 Most time, `bcx-validation` treats expression and function exchangeable. There are two special cases:
 
-> In `if` transformer, `{if: "conditionExpression"}` only support expression as condition. This is to avoid ambiguousness. If you want to validate a nested property named "if", you can use `{if: aFunction}` or `{if: {validate: "fullShapeRule"}}` or `{if: ["aliasInChain", ...]}`.
+> In `if` transformer, `{if: "conditionExpression"}` only supports expression as condition. This is to avoid ambiguousness. If you want to validate a nested property named "if", you can use `{if: aFunction}` or `{if: {validate: "fullShapeRule"}}` or `{if: ["aliasInChain", ...]}`.
 
 > In `foreach` transformer, top level function is a rule factory, not raw validator.
 
