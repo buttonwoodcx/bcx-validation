@@ -121,7 +121,7 @@ class Validation {
         });
 
         if (valueEval) {
-          variation.$value = valueEval(scope);
+          variation.$value = valueEval(scopeVariation(scope, variation));
         }
 
         return validator(scopeVariation(scope, variation));

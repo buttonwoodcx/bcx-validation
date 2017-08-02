@@ -339,3 +339,10 @@ test('Validation: user defined validator can overwrite existing validator', t =>
   t.deepEqual(v.validate({a: false}, rule), {a: ["--not-true--"]});
   t.end();
 });
+
+test('Validation: value override can access options', t => {
+  t.equal(v.validate(3, {validate: 'isTrue', value: '$value > $lowerLimit', lowerLimit: 2, message: 'must be greater than ${$lowerLimit}'}), undefined);
+  // TODO to support {message: 'must be greater than ${$lowerLimit}'}
+  t.deepEqual(v.validate(3, {validate: 'isTrue', value: '$value > $lowerLimit', lowerLimit: 5, message: 'must be greater than 5'}), ['must be greater than 5']);
+  t.end();
+});
