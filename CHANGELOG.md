@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.10 - 02/Aug/2017
+
+  * allow options to be used in value override on same validator.
+
 ## 0.2.9 - 08/Jun/2017
 
   * documentation.
