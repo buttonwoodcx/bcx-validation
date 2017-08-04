@@ -133,16 +133,16 @@ When you use regex, it behaves as value override with function `value => /\d/.te
 
 > `{validate: "isTrue", value: /regex/, message: "..."}` looks verbose, `bcx-validation` allows you to write `{validate: /regex/, message: "..."}` or simply `/regex/` (if you don't even want to override error message). The shortcuts are implemented in [transformer](#transformer-rule).
 
-#### Use bare string as shortcut
+#### Use bare string as alias
 
-When you don't need to override either value or error message. You can use the bare validator name as shortcut.
+When you don't need to override either value or error message. You can use the bare validator name as alias.
 
 ```javascript
 validation.validate(false, "isTrue")
 // => ["must be true"]
 ```
 
-> In the example showed in [README](../README.md), `"email"`, `"mandatory"` etc do not have the full shape of a rule. They are shortcuts, the full form of `"email"` is still `{validate: "email"}`.
+> In the example showed in [README](../README.md), `"email"`, `"mandatory"` etc do not have the full shape of a rule. They are aliases, the full form of `"email"` is still `{validate: "email"}`.
 
 ## Raw function as rule
 
