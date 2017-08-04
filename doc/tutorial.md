@@ -13,7 +13,7 @@ const validation = new Validation();
 
 A `model` can be simply a String or Number (or even Function or null/undefined). We will start with simplest `model` to show you the simplest usage of `rule`.
 
-Let's use term `validator` for an implementation of excuting certain `rule`.
+Let's use term `validator` for an implementation of executing certain `rule`.
 
 To use `isTrue` `validator`, you write a rule like this:
 
