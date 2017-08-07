@@ -9,7 +9,7 @@ const validation = new Validation();
 
 ## Basic shape of a rule
 
-`bcx-validation` makes zero assumption about your `model` (the stuff you want to validate), it can be any Javascript object.
+`bcx-validation` makes zero assumption about your `model` (the stuff you want to validate), it can be any JavaScript object.
 
 A `model` can be simply a String or Number (or even Function or null/undefined). We will start with simplest `model` to show you the simplest usage of `rule`.
 
