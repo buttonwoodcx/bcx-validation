@@ -163,13 +163,23 @@ export function config (validation) {
 
   // switch
   //
-  // {
-  //   switch: 'expression',
-  //   cases: {
-  //     "matchingA": {validate: 'name', ...},
-  //     "matchingB": [ /* validators */ ]
+  // on single field:
+  //   {
+  //     switch: 'expression',
+  //     cases: {
+  //       "matchingA": {validate: 'name', ...},
+  //       "matchingB": [ /* validators */ ]
+  //     }
   //   }
-  // }
+  //
+  // on nested object:
+  //   {
+  //     switch: 'expression',
+  //     cases: {
+  //       "matchingA": {field1: {validate: 'name', ...}, field2: [ /* validators */ ],
+  //       "matchingB": {/*...*/}
+  //     }
+  //   }
   //
   validation.addTransformer(switchTester, switchTransformer);
 
