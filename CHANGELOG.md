@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.11 - 10/Aug/2017
+
+  * improve performance by precompiling rules as much as possible.
+
 ## 0.2.10 - 02/Aug/2017
 
   * allow options to be used in value override on same validator.
