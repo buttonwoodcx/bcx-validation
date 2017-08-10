@@ -42,19 +42,21 @@ export const switchTester = function (rule) {
     _.isObjectLike(rule.cases);
 };
 
-export const switchTransformer = function (rule, validate) {
+export const switchTransformer = function (rule, validate, inPropertyName) {
   const _switch = _.get(rule, 'switch');
   const cases = _.get(rule, 'cases');
   const switchEvaluator = valueEvaluator(_switch);
 
+  const precompiledPlain = _.mapValues(cases, (rules, _case) => validate(rules));
+  const precompiledNested = _.mapValues(cases, (rules, _case) => validate(rules, inPropertyName));
+
   const validator = scope => {
     // make a guess whether user try to use nested validation or plain validation
     const value = scope.overrideContext.$value;
-    let nestedPath, _case;
+    let precompiled;
 
     if (_.isObjectLike(value)) {
       // in nested object
-      nestedPath = valueEvaluator('$propertyPath')(scope);
       const {overrideContext} = scope;
       let newOverrideContext = createOverrideContext(value, overrideContext);
       newOverrideContext.$value = value;
@@ -63,16 +65,13 @@ export const switchTransformer = function (rule, validate) {
         overrideContext: newOverrideContext
       };
 
-      _case = switchEvaluator(newScope);
+      precompiled = precompiledNested[switchEvaluator(newScope)];
     } else {
       // normal switch
-      _case = switchEvaluator(scope);
+      precompiled = precompiledPlain[switchEvaluator(scope)];
     }
 
-    const matchCase = cases[_case];
-    if (!matchCase) return;
-
-    return validate(matchCase, nestedPath)(scope);
+    return precompiled && precompiled(scope);
   };
 
   validator.readyToUse = true;
@@ -86,16 +85,20 @@ export const forEachTester = function (rule) {
   return true;
 };
 
-export const forEachTransformer = function (rule, validate) {
+export const forEachTransformer = function (rule, validate /*, inPropertyName*/) {
   const foreachRulesMap = _.get(rule, 'foreach');
   let foreachRulesMapFunc;
   if (_.isFunction(foreachRulesMap)) {
     foreachRulesMapFunc = valueEvaluator(foreachRulesMap);
-  } else if (_.isArray(foreachRulesMap)) {
+  } else if (_.isArray(foreachRulesMap) && _.some(foreachRulesMap, _.isFunction)) {
     foreachRulesMapFunc = scope => _.map(foreachRulesMap, r =>
       _.isFunction(r) ? valueEvaluator(r)(scope) : r
     );
   }
+
+  // don't pass inPropertyName to underneath validators,
+  // they work in new overrideContext with propertyPath null.
+  const precompiled = !foreachRulesMapFunc && validate(foreachRulesMap);
 
   const _key = _.get(rule, 'key', '$index');
   const keyEvaluator = valueEvaluator(_key);
@@ -126,9 +129,7 @@ export const forEachTransformer = function (rule, validate) {
       };
 
       const key = keyEvaluator(newScope);
-      const result = validate(foreachRulesMapFunc ?
-                              foreachRulesMapFunc(newScope) :
-                              foreachRulesMap)(newScope);
+      const result = (precompiled || validate(foreachRulesMapFunc(newScope)))(newScope);
 
       if (result.isValid === false) {
         errors[key] = result.errors;

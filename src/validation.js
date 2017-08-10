@@ -29,7 +29,7 @@ class Validation {
     configStandardValidators(this);
   }
 
-  buildValidator(rule) {
+  buildValidator(rule, inPropertyName) {
     let id = Math.random();
     const {message,
          stopValidationChainIfPass,
@@ -43,18 +43,18 @@ class Validation {
     } else if ((_.isString(rule) && !_.isEmpty(rule)) || _.isRegExp(rule)) {
       // try validator tranformer first
       // like we transform "mandatory" to {validate: "mandatory"}
-      validator = this.resolveValidator(rule);
+      validator = this.resolveValidator(rule, inPropertyName);
 
       if (!validator) {
         // wrap single expression/regex in isTrue
-        validator = this.resolveValidator({validate: "isTrue", value: rule});
+        validator = this.resolveValidator({validate: "isTrue", value: rule}, inPropertyName);
       }
     } else if (_.isObjectLike(rule)) {
       const rawRule = _.omit(rule, ['message',
                                     'stopValidationChainIfPass',
                                     'stopValidationChainIfFail']);
 
-      validator = this.resolveValidator(rawRule);
+      validator = this.resolveValidator(rawRule, inPropertyName);
     }
 
     if (!_.isFunction(validator)) {
@@ -67,7 +67,7 @@ class Validation {
                                              stopValidationChainIfFail});
   }
 
-  resolveValidator(rule) {
+  resolveValidator(rule, inPropertyName) {
     const isAlias = _.isString(rule);
 
     const _transformer = !isAlias && _.find(this._transformers, v => v.test(rule));
@@ -75,11 +75,11 @@ class Validation {
 
     if (_transformer) {
       // transformer
-      const transformed = _transformer.transformer(rule, this._validate);
+      const transformed = _transformer.transformer(rule, this._validate, inPropertyName);
       if (transformed.readyToUse) {
         return transformed;
       } else {
-        return this._validate(transformed);
+        return this._validate(transformed, inPropertyName);
       }
     } else if (!_validator) {
       const name = _.get(rule, 'validate');
@@ -92,7 +92,7 @@ class Validation {
       // is a validator or transformer,
       // only validator creates scope variation to
       // override $value and options.
-      const validator = this._validate(_validator);
+      const validator = this._validate(_validator, inPropertyName);
       if (isAlias) return validator;
 
       const value = _.get(rule, 'value');
@@ -164,14 +164,22 @@ class Validation {
   }
 
   generateValidator(rulesMap, helper) {
-    return model => this.validate(model, rulesMap, helper);
+    const compiled = this._validate(rulesMap);
+    return model => {
+      const scope = this._buildScope(model, helper);
+      return compiled(scope).errors;
+    };
   }
 
-  validate(model, rulesMap, helper = {}) {
+  _buildScope(model, helper = {}) {
     let scope = createSimpleScope(model, {...this.standardHelpers, ...helper});
     // initial $value and $propertyPath
     _.merge(scope.overrideContext, {$value: model, $propertyPath: null});
+    return scope;
+  }
 
+  validate(model, rulesMap, helper = {}) {
+    const scope = this._buildScope(model, helper);
     const result = this._validate(rulesMap)(scope);
     return result.errors;
   }
@@ -180,7 +188,7 @@ class Validation {
     if (_.isUndefined(rulesMap) || _.isNull(rulesMap)) return PASSED;
 
     // try validate the whole model without any nested property validation
-    const validator = this.buildValidator(rulesMap);
+    const validator = this.buildValidator(rulesMap, inPropertyName);
 
     if (validator) return validator;
 
@@ -192,6 +200,11 @@ class Validation {
 
     } else if (_.isObjectLike(rulesMap)) {
       // nested rules
+      const precompiled = _.mapValues(rulesMap, (rules, propertyName) => {
+        const path = inPropertyName ? [...inPropertyName, propertyName] : [propertyName];
+        return this._validate(rules, path);
+      });
+
       return standardValidatorWrap(scope => {
         const errors = {};
         _.each(rulesMap, (rules, propertyName) => {
@@ -205,7 +218,7 @@ class Validation {
             $neighbourValues: neighbourValues
           });
 
-          const result = this._validate(rules, path)(localScope);
+          const result = precompiled[propertyName](localScope);
 
           if (result.isValid === false) {
             errors[propertyName] = result.errors;
