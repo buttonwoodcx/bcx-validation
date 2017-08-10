@@ -66,6 +66,8 @@ const validate = validation.generateValidator(rule);
 validate(model);
 ```
 
+> `generateValidator` has performance benefit. It precompiles the rule for later repeated usage.
+
 Returned error object.
 
 ```javascript

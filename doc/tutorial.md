@@ -908,6 +908,8 @@ We learnt before that a raw function is treated as raw validator implemention. B
 
 > This is designed to provide flexibility in `foreach` when `switch` and `if` is not enough for conditional validation.
 
+> There is trade-off for this flexibility. Because rule factory requires runtime information to build the rule, it cannot be precompiled. This means you would not see much performance benefit with `generateValidator`.
+
 The above `foreach` + `switch` example can be rewritten as:
 ```javascript
 var rule = {
