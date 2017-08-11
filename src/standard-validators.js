@@ -47,8 +47,8 @@ export const switchTransformer = function (rule, validate, inPropertyName) {
   const cases = _.get(rule, 'cases');
   const switchEvaluator = valueEvaluator(_switch);
 
-  const precompiledPlain = _.mapValues(cases, (rules, _case) => validate(rules));
-  const precompiledNested = _.mapValues(cases, (rules, _case) => validate(rules, inPropertyName));
+  const precompiledPlain = _.mapValues(cases, rules => validate(rules));
+  const precompiledNested = _.mapValues(cases, rules => validate(rules, inPropertyName));
 
   const validator = scope => {
     // make a guess whether user try to use nested validation or plain validation
