@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.12 - 16/Aug/2017
+
+  * add basic TypeScript support.
+
 ## 0.2.11 - 10/Aug/2017
 
   * improve performance by precompiling rules as much as possible.
