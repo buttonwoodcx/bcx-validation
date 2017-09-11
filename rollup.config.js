@@ -5,7 +5,7 @@ import uglify from 'rollup-plugin-uglify';
 export default {
   entry: 'src/index.js',
   format: 'umd',
-  moduleName: 'BcxValidator',
+  moduleName: 'BcxValidation',
   dest: 'dist/index.js',
   external: ["lodash", "bcx-expression-evaluator"],
   globals: {
