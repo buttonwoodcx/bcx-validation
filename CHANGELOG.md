@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.13 - 11/Sep/2017
+
+  * fix global name.
+
 ## 0.2.12 - 16/Aug/2017
 
   * add basic TypeScript support.
