@@ -88,7 +88,7 @@ validation.validate("lorem", {validate: "isTrue",
 
 > While you have to be careful to do not provide functions throws exception, `bcx-expression-evaluator` is quite safe, silent most of the time, `"$value.length >= 8"` never throws exception.
 
-> The full list of arguments of that function is `function(value, propertyPath, context, get)`. We only used the first `value` argument here. `propertyPath` and `context` are useful in [nest rule](#nested-rule), `get` is a function to get arbitary expression value from current scope. In `bcx-validation`, no matter what you use function for, (to override value, to define raw validator, to provide a rule factory) they all have that same list of arguments, but there are different requiremnts on return value.
+> The full list of arguments of that function is `function(value, propertyPath, context, get)`. We only used the first `value` argument here. `propertyPath` and `context` are useful in [nest rule](#nested-rule), `get` is a function to get arbitrary expression value from current scope. In `bcx-validation`, no matter what you use function for, (to override value, to define raw validator, to provide a rule factory) they all have that same list of arguments, but there are different requirements on return value.
 
 If you are interested on using expression, please read through [bcx-expression-evaluator README](https://github.com/buttonwoodcx/bcx-expression-evaluator).
 
@@ -127,11 +127,11 @@ validation.validate("abc", {validate: "isTrue",
 
 When you use regex, it behaves as value override with function `value => /\d/.test(value)`.
 
-> The reason of supporting regex in value override, is `bcx-expression-evaluator`'s limitation. It doesn't allow regex literal inside expression.
+> The reason of specifically supporting regex in value override, is that `bcx-expression-evaluator` doesn't allow regex literal inside expression.
 
 > When use regex in value override, the returned value is either true or false. Use `isTrue` or `isFalse` validator with regex value override.
 
-> `{validate: "isTrue", value: /regex/, message: "..."}` looks verbose, `bcx-validation` allows you to write `{validate: /regex/, message: "..."}` or simply `/regex/` (if you don't even want to override error message). The shortcuts are implemented in [transformer](#transformer-rule).
+> `{validate: "isTrue", value: /regex/, message: "..."}` is verbose, `bcx-validation` allows you to write `{validate: /regex/, message: "..."}` or simply `/regex/` (if you don't even want to override error message). These shortcuts are implemented as [transformer](#transformer-rule).
 
 #### Use bare string as alias
 
@@ -169,7 +169,7 @@ validation.validate("abc", validateLength);
 
 ### Define new validator with function
 
-Raw function validator is rarely used. It doesn't take any of `bcx-validation`'s advantages. For reusability, it's better to add a new validator.
+Raw function validator is rarely used. It doesn't take any of `bcx-validation`'s advantages. For re-usability, it's better to add a new validator.
 
 ```javascript
 validation.addValidator("atLeast8Chars", value => {
@@ -204,7 +204,7 @@ validation.validate("name#id_123#mark", {validate: "atLeast8Chars",
 
 > `$errors` is a special context variable only within error message override, it represents the original error messages array.
 
-> You might noticed the new validator we defined is quite bad for reusage. It could be better if the min length was passed in as option `{validate: "atLeast", length: 8}`. We will revisit this and show you how to support option in validator function after [validator composition](#define-new-validator-with-composition).
+> You might noticed the new validator we defined is quite bad for reuse. It could be better if the min length was passed in as option `{validate: "atLeast", length: 8}`. We will revisit this and show you how to support option in validator function after [validator composition](#define-new-validator-with-composition).
 
 ## Chain of rules
 
@@ -265,11 +265,11 @@ var rule = [
     {validate: /[A-Z]/, message: "must contain upper case letter", stopValidationChainIfFail: true},
     {validate: /\d/, message: "must contain digit"}
   ],
-  {validate: /_/, message: "must contain undercore"}
+  {validate: /_/, message: "must contain underscore"}
 ];
 
 validation.validate("a", rule);
-// => [ 'must contain upper case letter', 'must contain undercore' ]
+// => [ 'must contain upper case letter', 'must contain underscore' ]
 ```
 
 With the introduction of chain control, it looks getting complicated. But fortunately, you will rarely use any of `passImmediatelyIf`, `skipImmediatelyIf`, `failImmediatelyIf`, `stopValidationChainIfFail` or `stopValidationChainIfPass`. They are meant to be used in defining new validator with composition.
@@ -288,7 +288,7 @@ validation.validate("id23", {if: "$value != 'NA'", validate: /id\d+/, message: "
 
 > We only support expression in `if` condition check, not function. This is to support an edge case that user really want to validate a property named "if" in the model. We will show example of this edge case in [nested rule](#nested-rule).
 
-Conditional validation was implemented as `if` transformer. When `bcx-validation` sees that conditional rule, it transforms it into:
+Conditional validation was implemented as `if` transformer. When `bcx-validation` sees that conditional rule above, it transforms it into:
 
 ```javascript
 validation.validate("NA", [
@@ -312,7 +312,7 @@ var rule = {
       {validate: /[A-Z]/, message: "must contain upper case letter", stopValidationChainIfFail: true},
       {validate: /\d/, message: "must contain digit"}
     ],
-    {validate: /_/, message: "must contain undercore"}
+    {validate: /_/, message: "must contain underscore"}
   ]
 };
 ```
@@ -359,7 +359,7 @@ validation.validate("a", "myToken");
 // => [ 'must contain upper case letter' ]
 ```
 
-That is the basic form of valiator composition, but it would be nicer if it supports flexible options. What about using options to turn on every parts of "myToken" validator.
+That is the basic form of validator composition, but it would be nicer if it supports flexible options. What about using options to turn on every parts of "myToken" validator.
 ```javascript
 validation.addValidator("myToken", [
   {if: "$lowerCase", validate: /[a-z]/, message: "must contain lower case letter", stopValidationChainIfFail: true},
@@ -451,7 +451,7 @@ If you use special option name "min.bind", instead of using string "ageLimit" as
 
 ```javascript
 var rule = {
-  name: ["mandatory", {validate: /^[A-Z]/, message: "must start with capitial letter"}],
+  name: ["mandatory", {validate: /^[A-Z]/, message: "must start with capital letter"}],
   age: ["notMandatory", {validate: "number", min: 16}]
 };
 
@@ -459,13 +459,13 @@ validation.validate({name: "", age: 18}, rule);
 // => { name: [ 'must not be empty' ] }
 
 validation.validate({name: "bob"}, rule);
-// => { name: [ 'must start with capitial letter' ] }
+// => { name: [ 'must start with capital letter' ] }
 
 validation.validate({name: "Bob", age: 12}, rule);
 // => { age: [ 'must be at least 16' ] }
 
 validation.validate({name: "bob", age: 12}, rule);
-// => { name: [ 'must start with capitial letter' ], age: [ 'must be at least 16' ] }
+// => { name: [ 'must start with capital letter' ], age: [ 'must be at least 16' ] }
 ```
 
 As expected, the result is nested too.
@@ -474,7 +474,7 @@ Since a nested rule is considered a rule, you can put it in a chain.
 
 ```javascript
 validation.validate({name: "bob", age: 12}, [rule]);
-// => { name: [ 'must start with capitial letter' ], age: [ 'must be at least 16' ] }
+// => { name: [ 'must start with capital letter' ], age: [ 'must be at least 16' ] }
 ```
 
 You can chain two nested rule together, `bcx-validation` takes care of merging result.
@@ -485,7 +485,7 @@ validation.validate({name: "", age: 12}, [
     name: ["mandatory"]
   },
   {
-    name: ["mandatory", {validate: /^[A-Z]/, message: "must start with capitial letter"}],
+    name: ["mandatory", {validate: /^[A-Z]/, message: "must start with capital letter"}],
     age: ["notMandatory", {validate: "number", min: 16}]
   }
 ]);
@@ -498,7 +498,7 @@ validation.validate({name: "", age: 12}, [
 
 ## Transformer rule
 
-`bcx-validation` uses transformer to simplify the shape of the rule. You will rarely need to define a new transformer. But if you understand it, a new type of transformer can provide you maxium flexibility.
+`bcx-validation` uses transformer to simplify the shape of the rule. You will rarely need to define a new transformer. But if you understand it, a new type of transformer can provide you maximum flexibility.
 
 We have learnt `if` transformer in conditional validation. Let's define a new `ifNot` transformer by reusing `if` transformer.
 
@@ -516,7 +516,7 @@ validation.addTransformer(
 
 The first argument for addTransformer is a tester function, it tests whether a rule can be processed by `ifNot` transformer. You would like to design the tester as defensive as possible to avoid false hit.
 
-The sencond argument is the transformer function itself, with the rule as input, return a transformed rule object as output. Here we rewrite the rule with `if` transformer.
+The second argument is the transformer function itself, with the rule as input, return a transformed rule object as output. Here we rewrite the rule with `if` transformer.
 
 > When `bcx-validation` resolves a rule, it recursively expands into understandable validators. Here the output of `ifNot` transformer is another rule need to be transformed by `if` transformer. There is no limit of the depth of the resolution, as long as your transformers/validators design did not end up in infinite loop.
 
@@ -582,7 +582,7 @@ The "switch" key accepts either expression or function. The result of the expres
 
 > Without `switch` transformer, you still can use multiple "if" conditional rules to do the same thing.
 
-> The only reason for using "readyToUse" mode to implement `switch` transformer, is to smartly support both normal mode and nested mode. If cut off support of nested mode, `switch` transformer can be implemented in normal transfomer by simply reusing `if` transformer.
+> The only reason for using "readyToUse" mode to implement `switch` transformer, is to smartly support both normal mode and nested mode. If cut off support of nested mode, `switch` transformer can be implemented in normal transformer by simply reusing `if` transformer.
 
 ### foreach transformer
 
@@ -636,9 +636,9 @@ validation.validate(model, rule);
 
 #### Special context variables introduced by foreach
 
-Undernearth, for every item in the model array, `foreach` transformer creates new override context (aurelia-binding concept) and add few special context variables.
+Underneath, for every item in the model array, `foreach` transformer creates new override context (aurelia-binding concept) and add few special context variables.
 
-> Similar to what aurelia repeator does in html template.
+> Similar to what aurelia repeater does in html template.
 
 For example, when `foreach` is validating property "name" of the first item `{id: 'aa', name: 'Arm'}`, it has following context variables.
 
@@ -656,7 +656,7 @@ $first: true
 $last: false
 ```
 
-> $propertyPath is an array of property names, it can have multiple items (like `['address', 'line1']`) if it's a deep nested validation. Internally, we use it as lodash property path. You may wonder why we pick the complex array form `['address', 'line1']`, not the simple dot notation form `'address.line1'`. Loash supports both forms, but for some property name like "x.y", dot notation doesn't work (`a.x.y` does not mean `a["x.y"]`).
+> $propertyPath is an array of property names, it can have multiple items (like `['address', 'line1']`) if it's a deep nested validation. Internally, we use it as lodash property path. You may wonder why we pick the complex array form `['address', 'line1']`, not the simple dot notation form `'address.line1'`. Lodash supports both forms, but for some property name like "x.y", dot notation doesn't work (`a.x.y` does not mean `a["x.y"]`).
 
 > $this is the new context created by foreach, which is the current item.
 
@@ -666,7 +666,7 @@ $last: false
 
 > $neighbourValues are the relevant property values on $neighbours, they are same as `_.map($neighbours, _.property($propertyPath))` when $propertyPath is not empty. [When $propertyPath is empty](#use-foreach-to-validate-simple-array), $neighbourValues are same as $neighbours.
 
-> $index, $first, $last are for the position of current item. They are similar to what aurelia repeator provides.
+> $index, $first, $last are for the position of current item. They are similar to what aurelia repeater provides.
 
 > For people with aurelia experience, note we don't have $even, $odd context variables in foreach. We don't provide them to avoid conflict with our standard "number" validator which supports $even/$odd options.
 
@@ -681,9 +681,9 @@ validation.addValidator("unique", {validate: "notIn", "items.bind": "$neighbourV
 
 "unique" validator reuses "notIn" validator, and use $neighbourValues in "notIn"'s "items" option.
 
-> This is a good example of using "option.bind". In validator composition, use "bind" to pass runtime information to undernearth validators.
+> This is a good example of using "option.bind". In validator composition, use "bind" to pass runtime information to underneath validators.
 
-Let's do another exercise around foreach context variables. Let's validate, that in a group of people, there are only certain maxium number of leaders.
+Let's do another exercise around foreach context variables. Let's validate, that in a group of people, there are only certain maximum number of leaders.
 
 ```javascript
 validation.addValidator("maxLeader", {
@@ -691,7 +691,7 @@ validation.addValidator("maxLeader", {
   validate: "number",
   value: "_($neighbours).filter({leader: true}).size()",
   "max.bind": "$max - 1",
-  message: "Only maxium ${$max} leaders allowed"
+  message: "Only maximum ${$max} leaders allowed"
 });
 ```
 
@@ -701,7 +701,7 @@ We reuse "number" validator, when current person is a leader, checks the count o
 
 > Note we didn't use $value or $propertyPath in any of the expressions. This means our "maxLeader" validator can be applied to any property of a person. We will elaborate this in examples.
 
-> We passed ($max - 1) to undernearth "number" validator's "max" option. This is not the only way to write "maxLeader", you can also do `{validate: "isTrue", value: "_...sizw() <= ($max - 1)"}`.
+> We passed ($max - 1) to underneath "number" validator's "max" option. This is not the only way to write "maxLeader", you can also do `{validate: "isTrue", value: "_($neighbours).filter({leader: true}).size() <= ($max - 1)"}`.
 
 Let's try out our "maxLeader" validator.
 
@@ -720,9 +720,9 @@ validate2Leaders([
   {name: 'D'},
 ]);
 /* =>
-{ '0': { leader: [ 'Only maxium 2 leaders allowed' ] },
-  '1': { leader: [ 'Only maxium 2 leaders allowed' ] },
-  '2': { leader: [ 'Only maxium 2 leaders allowed' ] } }
+{ '0': { leader: [ 'Only maximum 2 leaders allowed' ] },
+  '1': { leader: [ 'Only maximum 2 leaders allowed' ] },
+  '2': { leader: [ 'Only maximum 2 leaders allowed' ] } }
 */
 
 validate2Leaders([
@@ -750,9 +750,9 @@ validate2LeadersOnNameProperty([
   {name: 'D'},
 ]);
 /* =>
-{ '0': { name: [ 'Only maxium 2 leaders allowed' ] },
-  '1': { name: [ 'Only maxium 2 leaders allowed' ] },
-  '2': { name: [ 'Only maxium 2 leaders allowed' ] } }
+{ '0': { name: [ 'Only maximum 2 leaders allowed' ] },
+  '1': { name: [ 'Only maximum 2 leaders allowed' ] },
+  '2': { name: [ 'Only maximum 2 leaders allowed' ] } }
 */
 ```
 
@@ -764,7 +764,7 @@ validation.addValidator("maxLeader", {
   validate: "number",
   value: "_($neighbourValues).compact().size()", // _.compact removes false leader
   "max.bind": "$max - 1",
-  message: "Cannot exceed maxium ${$max} leaders"
+  message: "Cannot exceed maximum ${$max} leaders"
 });
 
 validate2Leaders([
@@ -774,9 +774,9 @@ validate2Leaders([
   {name: 'D'},
 ]);
 /* => validating on "leader" still works
-{ '0': { leader: [ 'Cannot exceed maxium 2 leaders' ] },
-  '1': { leader: [ 'Cannot exceed maxium 2 leaders' ] },
-  '2': { leader: [ 'Cannot exceed maxium 2 leaders' ] } }
+{ '0': { leader: [ 'Cannot exceed maximum 2 leaders' ] },
+  '1': { leader: [ 'Cannot exceed maximum 2 leaders' ] },
+  '2': { leader: [ 'Cannot exceed maximum 2 leaders' ] } }
 */
 
 validate2LeadersOnNameProperty([
@@ -786,10 +786,10 @@ validate2LeadersOnNameProperty([
   {name: 'D'},
 ]);
 /* => validating on "name", oops, all names are truthy
-{ '0': { name: [ 'Cannot exceed maxium 2 leaders' ] },
-  '1': { name: [ 'Cannot exceed maxium 2 leaders' ] },
-  '2': { name: [ 'Cannot exceed maxium 2 leaders' ] },
-  '3': { name: [ 'Cannot exceed maxium 2 leaders' ] } }
+{ '0': { name: [ 'Cannot exceed maximum 2 leaders' ] },
+  '1': { name: [ 'Cannot exceed maximum 2 leaders' ] },
+  '2': { name: [ 'Cannot exceed maximum 2 leaders' ] },
+  '3': { name: [ 'Cannot exceed maximum 2 leaders' ] } }
 */
 ```
 
@@ -859,7 +859,7 @@ var rule = {
         email: ["notMandatory", "email"],
         phone: ["notMandatory", "unique"]
       },
-      // strict rule on dealder
+      // strict rule on dealer
       {
         switch: 'type',
         cases: {
@@ -902,13 +902,13 @@ validation.validate({meta: {field1: "  ", field2: "hello"}},
 
 The last feature of `foreach` is that it treats raw function specially.
 
-We learnt before that a raw function is treated as raw validator implemention. But if it's used under `foreach`, it is treated as rule factory.
+We learnt before that a raw function is treated as raw validator implementation. But if it's used under `foreach`, it is treated as rule factory.
 
 > This only applies to top level raw function, either in `{foreach: aRuleFactoryFunc}` or `{foreach: [normalRule, aRuleFactoryFunc, anotherRuleFactoryFunc,...]}`.
 
 > This is designed to provide flexibility in `foreach` when `switch` and `if` is not enough for conditional validation.
 
-> There is trade-off for this flexibility. Because rule factory requires runtime information to build the rule, it cannot be precompiled. This means you would not see much performance benefit with `generateValidator`.
+> There is trade-off for this flexibility. Because rule factory requires runtime information to build the rule, it cannot be pre-compiled. This means you would not see much performance benefit with `generateValidator`.
 
 The above `foreach` + `switch` example can be rewritten as:
 ```javascript
