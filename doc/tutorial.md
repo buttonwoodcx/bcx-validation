@@ -343,7 +343,7 @@ validation.validate("hello", {validate: "isFalse", value: "$value.length > 4", m
 
 You see we reimplemented "isFalse" validator by reusing "isTrue" validator with value override `"!$value"` and error message override `"false is what I want"`.
 
-> `bcx-validation` implemented the default "isFalse" validator with function instead of composition for slightly better performance. Because "isTrue" and "isFalse" are heavily used by other validators implemented with composition.
+> `bcx-validation` implemented the default "isFalse" validator with function instead of composition for slightly better performance. Because "isTrue" and "isFalse" are heavily used by other validators implemented with composition, we want to squeeze the performance little bit.
 
 > with `validation.addValidator(name, composition_or_function)`, if you want, you can replace any of the standard validators.
 
