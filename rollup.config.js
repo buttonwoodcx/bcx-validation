@@ -6,14 +6,14 @@ export default {
   input: 'src/index.js',
   output: {
     format: 'umd',
+    name: 'BcxValidation',
     file: 'dist/index.js',
+    globals: {
+      "lodash": "_",
+      "bcx-expression-evaluator": "BcxExpressionEvaluator"
+    }
   },
-  name: 'BcxValidation',
   external: ["lodash", "bcx-expression-evaluator"],
-  globals: {
-    "lodash": "_",
-    "bcx-expression-evaluator": "BcxExpressionEvaluator"
-  },
   plugins: [
     resolve(),
     babel({
