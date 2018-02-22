@@ -1,4 +1,12 @@
-# Changelog
+<a name="0.2.14"></a>
+## [0.2.14](https://github.com/buttonwoodcx/bcx-validation/compare/v0.2.13...v0.2.14) (2018-01-30)
+
+
+### Features
+
+* better support of Aurelia cli. ([9ab41d6](https://github.com/buttonwoodcx/bcx-validation/commit/9ab41d6))
+
+
 
 ## 0.2.13 - 11/Sep/2017
 
