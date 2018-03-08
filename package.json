@@ -29,7 +29,7 @@
     "tape": "^4.9.0"
   },
   "scripts": {
-    "build": "rollup -c",
+    "build": "env BABEL_ENV=development rollup -c",
     "lint": "eslint src",
     "prepare": "npm run build",
     "preversion": "npm test",
