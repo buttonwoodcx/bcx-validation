@@ -1,3 +1,13 @@
+<a name="0.2.15"></a>
+## [0.2.15](https://github.com/buttonwoodcx/bcx-validation/compare/v0.2.14...v0.2.15) (2018-03-08)
+
+
+### Bug Fixes
+
+* fix BABEL_ENV to development to fix npm installation directly from git. ([5a89ed7](https://github.com/buttonwoodcx/bcx-validation/commit/5a89ed7))
+
+
+
 <a name="0.2.14"></a>
 ## [0.2.14](https://github.com/buttonwoodcx/bcx-validation/compare/v0.2.13...v0.2.14) (2018-01-30)
 
