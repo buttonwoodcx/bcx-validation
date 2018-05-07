@@ -1,3 +1,15 @@
+<a name="0.3.0-0"></a>
+# [0.3.0-0](https://github.com/buttonwoodcx/bcx-validation/compare/v0.2.15...v0.3.0-0) (2018-05-07)
+
+
+### Features
+
+* doc moved to new site ([aa5f110](https://github.com/buttonwoodcx/bcx-validation/commit/aa5f110))
+* support "if" transformer with "mandatory"/"notMandatory" rules ([e055b56](https://github.com/buttonwoodcx/bcx-validation/commit/e055b56))
+* support using any options and overridden value in message override ([4b11519](https://github.com/buttonwoodcx/bcx-validation/commit/4b11519))
+
+
+
 <a name="0.2.15"></a>
 ## [0.2.15](https://github.com/buttonwoodcx/bcx-validation/compare/v0.2.14...v0.2.15) (2018-03-08)
 
