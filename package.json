@@ -1,6 +1,6 @@
 {
   "name": "bcx-validation",
-  "version": "0.3.0-0",
+  "version": "0.3.0",
   "description": "Buttonwood validator",
   "keywords": [
     "validation"
