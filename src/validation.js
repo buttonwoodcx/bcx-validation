@@ -57,7 +57,8 @@ class Validation {
       validator = this.resolveValidator(rawRule, inPropertyName);
     }
 
-    if (!_.isFunction(validator)) {
+    if (!_.isFunction(validator) &&
+        !(validator && validator.$validator && validator.$patchScope)) {
       // Unsupported rule
       return;
     }
@@ -105,7 +106,7 @@ class Validation {
       }
 
       // otherwise, override scope with value and options
-      return scope => {
+      const patchScope = scope => {
         let variation = {};
         // prefix option name with $ in scope to reduce chance of conflict
 
@@ -124,9 +125,11 @@ class Validation {
           variation.$value = valueEval(scopeVariation(scope, variation));
         }
 
-        return validator(scopeVariation(scope, variation));
+        return scopeVariation(scope, variation);
       };
 
+      // let standardValidatorWrap to deal with scope variation
+      return {$validator: validator, $patchScope: patchScope};
     }
   }
 

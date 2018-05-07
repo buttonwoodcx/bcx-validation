@@ -21,12 +21,20 @@ export default function (validator, opts = {}) {
   }
 
   return scope => {
-    let result = new ValidationResult(validator(scope));
+    let _validator = validator;
+    let _scope = scope;
+
+    if (validator.$patchScope && validator.$validator) {
+      _scope = validator.$patchScope(scope);
+      _validator = validator.$validator;
+    }
+
+    let result = new ValidationResult(_validator(_scope));
     const forceBreak = (result.isValid === true && stopValidationChainIfPass) ||
                     (result.isValid === false && stopValidationChainIfFail);
 
     const overrideMessage = (!result.isValid && messageEvaluator) ?
-                            messageEvaluator(scopeVariation(scope, {$errors: result.errors})) :
+                            messageEvaluator(scopeVariation(_scope, {$errors: result.errors})) :
                             null;
 
     if (forceBreak || overrideMessage) {
