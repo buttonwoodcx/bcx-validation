@@ -3,15 +3,23 @@ import _ from 'lodash';
 export default function (validators) {
   return scope => {
     let results = [];
+    let len = validators.length;
+    let finalBreak = false;
 
-    _.each(validators, validator => {
-      const result = validator(scope);
+    for (let i = 0; i < len; i ++) {
+      const result = validators[i](scope);
       results.push(result);
 
-      // early break
-      if (result && result.break) return false;
-    });
+      if (i === len - 1 && result && result.break) {
+        finalBreak = true;
+      }
 
+      // early break
+      if (result && result.break) break;
+    }
+
+    // final break in chain surfaces out
+    if (finalBreak) results.break = true;
     return results;
   };
 }

@@ -37,6 +37,25 @@ test('if: support stopValidationChainIfFail', t => {
   t.end();
 });
 
+test('if: support mandatory/notMandatory (through final break in validator-chain)', t => {
+  let rule = {a: [
+    {if: "b", validate: "mandatory"},
+    "email"
+  ]};
+
+  t.deepEqual(v.validate({a: '', b: true}, rule), {a: ['must not be empty']});
+  t.deepEqual(v.validate({a: '', b: false}, rule), {a: ['not a valid email']});
+
+  rule = {a: [
+    {if: "b", validate: "notMandatory"},
+    "email"
+  ]};
+
+  t.deepEqual(v.validate({a: '', b: true}, rule), undefined);
+  t.deepEqual(v.validate({a: '', b: false}, rule), {a: ['not a valid email']});
+  t.end();
+});
+
 test('if: support group', t => {
   let rule = {a: {if: 'mixCase', group: [/[a-z]/, /[A-Z]/], message: 'must contain both lower case and upper case letters'},
     };

@@ -65,6 +65,9 @@ export default class ValidationResult {
 
         this.isValid = finalIsValid;
       });
+
+      // final break in chain surfaces out
+      if (result.break) this.break = true;
     } else if (_.has(result, 'isValid')) {
       // isValid is tri-state
       // true, false, or null (don't care, skip)

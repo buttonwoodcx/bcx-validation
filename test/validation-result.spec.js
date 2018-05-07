@@ -64,6 +64,25 @@ test('ValidationResult: handles tri-state isValid', t => {
   t.end();
 });
 
+test('ValidationResult: surfaces out final break in chain', t => {
+  const chain = [
+    {isValid: false, errors: ['foo'], break: true}
+  ];
+
+  // the first break is not final break
+  t.deepEqual(v(chain), {isValid: false, errors: ['foo']});
+
+  const chain2 = [
+    {isValid: true},
+    {isValid: false, errors: ['foo'], break: true}
+  ];
+
+  // final break
+  chain2.break = true;
+  t.deepEqual(v(chain2), {isValid: false, errors: ['foo'], break: true});
+  t.end();
+});
+
 test('ValidationResult: processes nested result, remove duplicated messages', t => {
   const result = [
     "foo",

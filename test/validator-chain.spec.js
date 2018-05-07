@@ -17,18 +17,23 @@ test('validatorChain: chains results', t => {
   t.end();
 });
 
-test('validatorChain: support early break', t => {
+test('validatorChain: supports early break', t => {
   let result = chain({breakAt0: true});
   t.equal(result.length, 1);
   t.deepEqual(_.map(result, 't'), [0]);
+  t.notOk(result.break);
 
   result = chain({breakAt1: true});
   t.equal(result.length, 2);
   t.deepEqual(_.map(result, 't'), [0, 1]);
+  t.notOk(result.break);
+  t.end();
+});
 
-
-  result = chain({breakAt2: true});
+test('validatorChain: surfaces out final break', t => {
+  let result = chain({breakAt2: true});
   t.equal(result.length, 3);
   t.deepEqual(_.map(result, 't'), [0, 1, 2]);
+  t.ok(result.break);
   t.end();
 });
