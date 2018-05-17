@@ -1,3 +1,13 @@
+<a name="0.3.3"></a>
+## [0.3.3](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.2...v0.3.3) (2018-05-17)
+
+
+### Features
+
+* support default case for switch transformer ([fa7d579](https://github.com/buttonwoodcx/bcx-validation/commit/fa7d579))
+
+
+
 <a name="0.3.2"></a>
 ## [0.3.2](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.1...v0.3.2) (2018-05-17)
 
