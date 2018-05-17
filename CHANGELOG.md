@@ -1,3 +1,13 @@
+<a name="0.3.1"></a>
+## [0.3.1](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.0...v0.3.1) (2018-05-17)
+
+
+### Features
+
+* support using function to override error message ([b189c6d](https://github.com/buttonwoodcx/bcx-validation/commit/b189c6d))
+
+
+
 <a name="0.3.0"></a>
 # [0.3.0](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.0-0...v0.3.0) (2018-05-07)
 
