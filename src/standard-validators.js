@@ -37,7 +37,7 @@ export const ifTransformer = function (rule) {
 export const switchTester = function (rule) {
   if (!_.has(rule, 'switch')) return false;
   if (!_.has(rule, 'cases')) return false;
-  if (!_.isEmpty(_.omit(rule, ['switch', 'cases']))) return false;
+  if (!_.isEmpty(_.omit(rule, ['switch', 'cases', 'default']))) return false;
   return (_.isString(rule.switch) || _.isFunction(rule.switch)) &&
     _.isObjectLike(rule.cases);
 };
@@ -45,15 +45,18 @@ export const switchTester = function (rule) {
 export const switchTransformer = function (rule, validate, inPropertyName) {
   const _switch = _.get(rule, 'switch');
   const cases = _.get(rule, 'cases');
+  const _default = _.get(rule, 'default');
   const switchEvaluator = valueEvaluator(_switch);
 
   const precompiledPlain = _.mapValues(cases, rules => validate(rules));
   const precompiledNested = _.mapValues(cases, rules => validate(rules, inPropertyName));
+  const precompiledPlainDefault = _default && validate(_default);
+  const precompiledNestedDefault = _default && validate(_default, inPropertyName);
 
   const validator = scope => {
     // make a guess whether user try to use nested validation or plain validation
     const value = scope.overrideContext.$value;
-    let precompiled;
+    let precompiled, precompiledDefault;
 
     if (_.isObjectLike(value)) {
       // in nested object
@@ -66,12 +69,18 @@ export const switchTransformer = function (rule, validate, inPropertyName) {
       };
 
       precompiled = precompiledNested[switchEvaluator(newScope)];
+      precompiledDefault = precompiledNestedDefault;
     } else {
       // normal switch
       precompiled = precompiledPlain[switchEvaluator(scope)];
+      precompiledDefault = precompiledPlainDefault;
     }
 
-    return precompiled && precompiled(scope);
+    if (precompiled) {
+      return precompiled(scope);
+    } else if (precompiledDefault) {
+      return precompiledDefault(scope);
+    }
   };
 
   validator.readyToUse = true;
