@@ -29,7 +29,12 @@ export default function (validator, opts = {}) {
                     (result.isValid === false && stopValidationChainIfFail);
 
     const overrideMessage = (!result.isValid && messageEvaluator) ?
-                            messageEvaluator(scopeVariation(_scope, {$errors: result.errors})) :
+                            messageEvaluator(scopeVariation(_scope, {
+                              // use original scope $value, not overrided value
+                              $value: scope.overrideContext.$value,
+                              // pass original errors
+                              $errors: result.errors
+                            })) :
                             null;
 
     if (forceBreak || overrideMessage) {

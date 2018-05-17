@@ -270,7 +270,7 @@ test('Validation: wraps errors', t => {
 test('Validation: can add default helper', t => {
   v.addHelper('sum', (a, b) => a + b);
   let rules = {
-    a: {validate: 'number', value: 'sum($value, b)', greaterThan: 10, message: "sum(${$value}) is not more than 10"}
+    a: {validate: 'number', value: 'sum($value, b)', greaterThan: 10, message: "sum(${sum($value, b)}) is not more than 10"}
   };
 
   t.deepEqual(v.validate({a: 2, b: 3}, rules), {

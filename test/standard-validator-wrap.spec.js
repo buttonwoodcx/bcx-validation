@@ -32,7 +32,11 @@ test('standardValidatorWrap: overrides error message', t => {
 
 test('standardValidatorWrap: overrides error message with string interoperation', t => {
   const s = createSimpleScope({});
-  t.deepEqual(w(() => "foo", {message: "bar ${$errors.join(',')}"})(s), {isValid: false, errors: ['bar foo']});
+  s.overrideContext.$value = 'test';
+  t.deepEqual(w({
+    $patchScope: scope => scopeVariation(scope, {$value: 'lorem'}),
+    $validator: () => "foo"
+  }, {message: "${$value} bar ${$errors.join(',')}"})(s), {isValid: false, errors: ['test bar foo']});
   t.end();
 });
 
@@ -57,11 +61,13 @@ test('standardValidatorWrap: patches scope', t => {
     }
   };
 
-  const good = createSimpleScope({$value: 'good'});
-  const bad = createSimpleScope({$value: 'bad'});
+  const good = createSimpleScope({});
+  good.overrideContext.$value = 'good';
+  const bad = createSimpleScope({});
+  bad.overrideContext.$value = 'bad';
   t.deepEqual(w(validator)(good), {isValid: true});
-  t.deepEqual(w(validator, {message: 'length ${$value} < min ${$min}'})(good), {isValid: true});
+  t.deepEqual(w(validator, {message: 'length of ${$value} is less than ${$min}'})(good), {isValid: true});
   t.deepEqual(w(validator)(bad), {isValid: false, errors: ['foo']});
-  t.deepEqual(w(validator, {message: '${$errors.join(",")}: length ${$value} < min ${$min}'})(bad), {isValid: false, errors: ['foo: length 3 < min 4']});
+  t.deepEqual(w(validator, {message: '${$errors.join(",")}: length of ${$value} is less than ${$min}'})(bad), {isValid: false, errors: ['foo: length of bad is less than 4']});
   t.end();
 });
