@@ -25,8 +25,21 @@ test('standardValidatorWrap: forces break', t => {
 });
 
 test('standardValidatorWrap: overrides error message', t => {
-  const s = createSimpleScope({$value: undefined});
+  const s = createSimpleScope({});
   t.deepEqual(w(() => "foo", {message: 'bar'})(s), {isValid: false, errors: ['bar']});
+  t.end();
+});
+
+test('standardValidatorWrap: overrides error message with string interoperation', t => {
+  const s = createSimpleScope({});
+  t.deepEqual(w(() => "foo", {message: "bar ${$errors.join(',')}"})(s), {isValid: false, errors: ['bar foo']});
+  t.end();
+});
+
+test('standardValidatorWrap: overrides error message with function', t => {
+  const s = createSimpleScope({});
+  s.overrideContext.$value = 'test';
+  t.deepEqual(w(() => "foo", {message: v => v + ' is invalid'})(s), {isValid: false, errors: ['test is invalid']});
   t.end();
 });
 
