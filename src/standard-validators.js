@@ -283,11 +283,17 @@ export function config (validation) {
     {if: "$maxLength", validate: "isTrue", value: "_.size($value) <= $maxLength", message: "must be no more than ${$maxLength} characters"}
   ]);
 
-  // {validate: 'within', items: [ ... ]}
-  validation.addValidator("within", {validate: "isTrue", value: "_.includes($items, $value)", message: "must be one of ${_.join($items, ', ')}"});
+  // {validate: 'within', items: [ ... ], caseInsensitive: true}
+  validation.addValidator("within", [
+    {if: "!$caseInsensitive", validate: "isTrue", value: "_.includes($items, $value)", message: "must be one of ${_.join($items, ', ')}"},
+    {if: "$caseInsensitive", validate: "isTrue", value: "_.includes(_.map($items, _.toLower), _.toLower($value))", message: "must be one of ${_.join($items, ', ')}"},
+  ]);
 
-  // {validate: 'notIn', items: [ ... ]}
-  validation.addValidator("notIn", {validate: "isFalse", value: "_.includes($items, $value)", message: "must not be one of ${_.join($items, ', ')}"});
+  // {validate: 'notIn', items: [ ... ], caseInsensitive: true}
+  validation.addValidator("notIn", [
+    {if: "!$caseInsensitive", validate: "isFalse", value: "_.includes($items, $value)", message: "must not be one of ${_.join($items, ', ')}"},
+    {if: "$caseInsensitive", validate: "isFalse", value: "_.includes(_.map($items, _.toLower), _.toLower($value))", message: "must not be one of ${_.join($items, ', ')}"},
+  ]);
 
   // {validate: 'contain', item: obj, /* or items: [...] */}
   validation.addValidator("contain", [
