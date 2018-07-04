@@ -1,3 +1,14 @@
+<a name="0.3.4"></a>
+## [0.3.4](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.3...v0.3.4) (2018-07-04)
+
+
+### Features
+
+* add URL validator ([2a8edcd](https://github.com/buttonwoodcx/bcx-validation/commit/2a8edcd))
+* support case insensitive match for within/notIn validators ([44c157a](https://github.com/buttonwoodcx/bcx-validation/commit/44c157a))
+
+
+
 <a name="0.3.3"></a>
 ## [0.3.3](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.2...v0.3.3) (2018-05-17)
 
