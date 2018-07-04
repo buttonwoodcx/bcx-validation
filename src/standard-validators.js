@@ -324,6 +324,6 @@ export function config (validation) {
   // but limited to just http and https protocol
   validation.addValidator("url", [
     {validate: "isFalse", value: /\s/, message: 'not a valid URL, white space must be escaped'},
-    {validate: "isTrue", value: /^https?:\/\/[^/?#]*[^?#]*(\?[^#]*)?(#.*)?/, message: 'not a valid URL'}
+    {validate: "isTrue", value: /^https?:\/\/[^/?#]*[^?#]*(\?[^#]*)?(#.*)?$/, message: 'not a valid URL'}
   ]);
 }
