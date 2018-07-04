@@ -321,7 +321,7 @@ export function config (validation) {
 
   // url, only http and https are supported
   // regex based on https://www.ietf.org/rfc/rfc3986.txt
-  // but limited to just http and https protocal
+  // but limited to just http and https protocol
   validation.addValidator("url", [
     {validate: "isFalse", value: /\s/, message: 'not a valid URL, white space must be escaped'},
     {validate: "isTrue", value: /^https?:\/\/[^/?#]*[^?#]*(\?[^#]*)?(#.*)?/, message: 'not a valid URL'}
