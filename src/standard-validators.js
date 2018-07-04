@@ -318,4 +318,12 @@ export function config (validation) {
   // unique. need to access neighbours
   // option items is evaluated from current scope
   validation.addValidator("unique", {validate: "notIn", "items.bind": "$neighbourValues", message: "must be unique"});
+
+  // url, only http and https are supported
+  // regex based on https://www.ietf.org/rfc/rfc3986.txt
+  // but limited to just http and https protocal
+  validation.addValidator("url", [
+    {validate: "isFalse", value: /\s/, message: 'not a valid URL, white space must be escaped'},
+    {validate: "isTrue", value: /^https?:\/\/[^/?#]*[^?#]*(\?[^#]*)?(#.*)?/, message: 'not a valid URL'}
+  ]);
 }
