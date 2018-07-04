@@ -1,3 +1,8 @@
+<a name="0.3.5"></a>
+## [0.3.5](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.4...v0.3.5) (2018-07-04)
+
+
+
 <a name="0.3.4"></a>
 ## [0.3.4](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.3...v0.3.4) (2018-07-04)
 
