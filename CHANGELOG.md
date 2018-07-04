@@ -1,3 +1,13 @@
+<a name="0.3.6"></a>
+## [0.3.6](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.5...v0.3.6) (2018-07-04)
+
+
+### Bug Fixes
+
+* invalid url without domain ([5861aaf](https://github.com/buttonwoodcx/bcx-validation/commit/5861aaf))
+
+
+
 <a name="0.3.5"></a>
 ## [0.3.5](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.4...v0.3.5) (2018-07-04)
 
