@@ -9,6 +9,7 @@ test('url: tests url', t => {
   t.deepEqual(v.validate({a: 'c'}, rule), {a: ["not a valid URL"]});
   t.deepEqual(v.validate({a: 'ftp://xyz.com/file.tar.gz'}, rule), {a: ["not a valid URL"]});
   t.equal(v.validate({a: 'https://t'}, rule), undefined);
+  t.deepEqual(v.validate({a: 'http://'}, rule), {a: ["not a valid URL"]});
   t.equal(v.validate({a: 'https://t?q=1#hash'}, rule), undefined);
   t.deepEqual(v.validate({a: 'https://t?q= 1'}, rule), {a: ["not a valid URL, white space must be escaped"]});
 
