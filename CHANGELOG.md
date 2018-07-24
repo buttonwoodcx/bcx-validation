@@ -1,3 +1,13 @@
+<a name="0.3.7"></a>
+## [0.3.7](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.6...v0.3.7) (2018-07-24)
+
+
+### Features
+
+* in email validator, block Intranet email address user@server1 as it's rarely used nowadays ([5104bce](https://github.com/buttonwoodcx/bcx-validation/commit/5104bce))
+
+
+
 <a name="0.3.6"></a>
 ## [0.3.6](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.5...v0.3.6) (2018-07-04)
 
