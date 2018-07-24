@@ -12,6 +12,7 @@ test('email: tests email', t => {
   // shortcut
   rule = {a: "email"};
   t.deepEqual(v.validate({a: 'c'}, rule), {a: ["not a valid email"]});
+  t.deepEqual(v.validate({a: 'ab@test'}, rule), {a: ["not a valid email"]});
   t.equal(v.validate({a: 'ab@test.com'}, rule), undefined);
   t.end();
 });

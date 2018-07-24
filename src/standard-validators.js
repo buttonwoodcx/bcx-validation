@@ -312,7 +312,8 @@ export function config (validation) {
   ]);
 
   // email regex from https://html.spec.whatwg.org/multipage/forms.html#valid-e-mail-address
-  validation.addValidator("email", {validate: "isTrue", value: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+  // updated to block Intranet email address user@server1 as it's rarely used nowadays
+  validation.addValidator("email", {validate: "isTrue", value: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/,
              message: "not a valid email"});
 
   // unique. need to access neighbours
