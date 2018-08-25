@@ -1,3 +1,13 @@
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.7...v0.4.0) (2018-08-25)
+
+
+### Features
+
+* use babel loose mode for faster/smaller code ([dd3dac3](https://github.com/buttonwoodcx/bcx-validation/commit/dd3dac3))
+
+
+
 <a name="0.3.7"></a>
 ## [0.3.7](https://github.com/buttonwoodcx/bcx-validation/compare/v0.3.6...v0.3.7) (2018-07-24)
 
