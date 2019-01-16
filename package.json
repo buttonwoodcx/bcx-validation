@@ -20,13 +20,13 @@
     "@babel/preset-env": "^7.2.3",
     "@babel/register": "^7.0.0",
     "babel-eslint": "^10.0.1",
-    "eslint": "^5.11.0",
-    "rollup": "^0.68.2",
-    "rollup-plugin-babel": "^4.1.0",
+    "eslint": "^5.12.0",
+    "rollup": "^1.1.0",
+    "rollup-plugin-babel": "^4.3.0",
     "rollup-plugin-node-resolve": "^4.0.0",
-    "rollup-plugin-terser": "^3.0.0",
+    "rollup-plugin-terser": "^4.0.2",
     "standard-changelog": "^2.0.6",
-    "tape": "^4.9.1"
+    "tape": "^4.9.2"
   },
   "scripts": {
     "build": "env BABEL_ENV=development rollup -c",
@@ -46,7 +46,7 @@
   ],
   "dependencies": {
     "bcx-expression-evaluator": "^1.0.0",
-    "lodash": "^4.0.0"
+    "lodash": "^4.17.11"
   },
   "aurelia": {
     "import": {
