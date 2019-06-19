@@ -47,20 +47,5 @@
   "dependencies": {
     "bcx-expression-evaluator": "^1.0.0",
     "lodash": "^4.17.11"
-  },
-  "aurelia": {
-    "import": {
-      "dependencies": [
-        "bcx-expression-evaluator",
-        "bcx-validation",
-        "lodash"
-      ],
-      "tutorial": [
-        "Inject to your Aurelia component",
-        "import Validation from 'bcx-validation';",
-        "@inject(Validation)",
-        "export class YourComponent {...}"
-      ]
-    }
   }
 }
