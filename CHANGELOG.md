@@ -1,3 +1,12 @@
+# [1.1.0](https://github.com/buttonwoodcx/bcx-validation/compare/v1.0.0...v1.1.0) (2019-10-11)
+
+
+### Features
+
+* support shared helpers with class method Validation.addHelper() ([0163f13](https://github.com/buttonwoodcx/bcx-validation/commit/0163f1351be7b79d0a284fe67957b424d66beeac))
+
+
+
 <a name="1.0.0"></a>
 # [1.0.0](https://github.com/buttonwoodcx/bcx-validation/compare/v0.4.0...v1.0.0) (2018-10-04)
 
