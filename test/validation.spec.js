@@ -280,6 +280,32 @@ test('Validation: can add default helper', t => {
   t.end();
 });
 
+test('Validation: can add shared helper', t => {
+  Validation.addHelper('sum2', (a, b) => a + b);
+
+  let rules = {
+    a: {validate: 'number', value: 'sum($value, b)', greaterThan: 10, message: "sum2(${sum2($value, b)}) is not more than 10"}
+  };
+
+  const v = new Validation();
+  t.deepEqual(v.validate({a: 2, b: 3}, rules), {
+    a: ["sum2(5) is not more than 10"]
+  });
+
+  const v2 = new Validation();
+  v2.addHelper('sum2', (a, b) => 1 + a + b);
+  t.deepEqual(v2.validate({a: 2, b: 3}, rules), {
+    a: ["sum2(6) is not more than 10"]
+  });
+
+  const v3 = new Validation();
+  t.deepEqual(v3.validate({a: 2, b: 3}, rules), {
+    a: ["sum2(5) is not more than 10"]
+  });
+
+  t.end();
+});
+
 test('Validation: user defined transformer works', t => {
   v.addTransformer(
     rule => (rule && _.isString(rule.ifNot) && !_.isEmpty(_.omit(rule, 'ifNot'))),

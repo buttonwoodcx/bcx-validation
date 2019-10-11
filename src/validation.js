@@ -175,7 +175,7 @@ class Validation {
   }
 
   _buildScope(model, helper = {}) {
-    let scope = createSimpleScope(model, {...this.standardHelpers, ...helper});
+    let scope = createSimpleScope(model, {...Validation.sharedHelpers, ...this.standardHelpers, ...helper});
     // initial $value and $propertyPath
     _.merge(scope.overrideContext, {$value: model, $propertyPath: null});
     return scope;
@@ -237,5 +237,12 @@ class Validation {
   }
 
 }
+
+Validation.sharedHelpers = {};
+Validation.addHelper = function(name, helper) {
+  if (_.isString(name) && !_.isEmpty(name)) {
+    Validation.sharedHelpers[name] = helper;
+  }
+};
 
 export default Validation;
