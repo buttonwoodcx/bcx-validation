@@ -115,7 +115,7 @@ class Validation {
             // support binding on option like "maxLength.bind":...
             const trueName = name.substr(0, name.length - 5);
             const optionEval = valueEvaluator(v);
-            variation[`$${trueName}`] = optionEval && optionEval(scope) || v;
+            variation[`$${trueName}`] = optionEval(scope);
           } else {
             variation[`$${name}`] = v;
           }

@@ -19,10 +19,11 @@ export const ifTester = function (rule) {
 export const ifTransformer = function (rule) {
   const _if = _.get(rule, 'if');
   const subRule = _.omit(rule, 'if');
+  const options = _.omit(subRule, 'group', 'validate', 'value', 'message');
 
   let rules = [];
   // if condition is false, skip the real validation
-  rules.push({validate: "skipImmediatelyIf", value: `!(${_if})`});
+  rules.push({validate: "skipImmediatelyIf", value: `!(${_if})`, ...options});
 
   if (_.has(subRule, 'group') &&
       _.isArray(subRule.group)) {
