@@ -79,3 +79,20 @@ test('if: smart enough to separate validation from if transformer', t => {
 
   t.end();
 });
+
+test('if: support options', t => {
+  let rule = {a: [
+    {if: "$b", validate: "mandatory", b: true}
+  ]};
+
+  t.deepEqual(v.validate({a: ''}, rule), {a: ['must not be empty']});
+
+  rule = {a: [
+    {if: "$b", validate: "mandatory", "b.bind": "c"}
+  ]};
+
+  t.deepEqual(v.validate({a: '', c: true}, rule), {a: ['must not be empty']});
+  t.equal(v.validate({a: '', c: false}, rule), undefined);
+
+  t.end();
+});
