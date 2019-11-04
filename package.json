@@ -20,8 +20,8 @@
     "@babel/preset-env": "^7.6.3",
     "@babel/register": "^7.6.2",
     "babel-eslint": "^10.0.3",
-    "eslint": "^6.5.1",
-    "rollup": "^1.23.1",
+    "eslint": "^6.6.0",
+    "rollup": "^1.26.3",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-terser": "^5.1.2",
@@ -45,7 +45,7 @@
     "index.d.ts"
   ],
   "dependencies": {
-    "bcx-expression-evaluator": "^1.0.1",
+    "bcx-expression-evaluator": "^1.1.0",
     "lodash": "^4.17.15"
   }
 }
