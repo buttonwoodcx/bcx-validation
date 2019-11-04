@@ -1,3 +1,12 @@
+## [1.1.1](https://github.com/buttonwoodcx/bcx-validation/compare/v1.1.0...v1.1.1) (2019-11-04)
+
+
+### Bug Fixes
+
+* allow if transformer to access custom options ([75cda2b](https://github.com/buttonwoodcx/bcx-validation/commit/75cda2bf29f6bd303a226e0e3406a0d12beb82f6)), closes [#3](https://github.com/buttonwoodcx/bcx-validation/issues/3)
+
+
+
 # [1.1.0](https://github.com/buttonwoodcx/bcx-validation/compare/v1.0.0...v1.1.0) (2019-10-11)
 
 
