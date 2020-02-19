@@ -1,4 +1,4 @@
-# bcx-validation [![Build Status](https://travis-ci.org/buttonwoodcx/bcx-validation.svg?branch=master)](https://travis-ci.org/buttonwoodcx/bcx-validation)
+# bcx-validation ![CI](https://github.com/buttonwoodcx/bcx-validation/workflows/CI/badge.svg)
 
 Another validation library to meet our own need.
 
