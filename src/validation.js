@@ -30,7 +30,6 @@ class Validation {
   }
 
   buildValidator(rule, inPropertyName) {
-    let id = Math.random();
     const {message,
          stopValidationChainIfPass,
          stopValidationChainIfFail} = rule || {};
