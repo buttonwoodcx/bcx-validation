@@ -41,7 +41,7 @@ class Validation {
       // raw rule in function
       validator = valueEvaluator(rule);
     } else if ((_.isString(rule) && !_.isEmpty(rule)) || _.isRegExp(rule)) {
-      // try validator tranformer first
+      // try validator transformer first
       // like we transform "mandatory" to {validate: "mandatory"}
       validator = this.resolveValidator(rule, inPropertyName);
 
