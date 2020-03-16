@@ -67,3 +67,12 @@ test('Validation: can use helper', t => {
   t.deepEqual(v.validate({a: ['bar', 'foo']}, rule), {a: ['lorem']}, 'missing helper yields undefined');
   t.end();
 });
+
+test('isTrue: validates isTrue for single expression', t => {
+  let rule = {
+    a: "b < c"
+  };
+  t.equal(v.validate({a: false, b: 1, c: 2}, rule), undefined);
+  t.deepEqual(v.validate({a: true, b: 2, c: 1}, rule), {a: ['must be true']});
+  t.end();
+});
