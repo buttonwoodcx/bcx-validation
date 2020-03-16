@@ -26,6 +26,7 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-terser": "^5.3.0",
     "standard-changelog": "^2.0.21",
+    "tap-nirvana": "^1.1.0",
     "tape": "^4.13.2"
   },
   "scripts": {
@@ -36,7 +37,7 @@
     "version": "standard-changelog && git add CHANGELOG.md",
     "postversion": "git push && git push --tags && npm publish",
     "pretest": "npm run lint",
-    "test": "env BABEL_ENV=test tape -r @babel/register 'test/**/*.spec.js'"
+    "test": "env BABEL_ENV=test tape -r @babel/register 'test/**/*.spec.js' | tap-nirvana"
   },
   "main": "dist/index.js",
   "types": "index.d.ts",

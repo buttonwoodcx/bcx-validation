@@ -110,14 +110,20 @@ class Validation {
         let variation = {};
         // prefix option name with $ in scope to reduce chance of conflict
 
+        // load static options first
+        _.forOwn(options, (v, name) => {
+          if (_.endsWith(name, '.bind')) return;
+          variation[`$${name}`] = v;
+        });
+
+        // Then load runtime options
+        const withStaticOptions = scopeVariation(scope, variation);
         _.forOwn(options, (v, name) => {
           if (_.endsWith(name, '.bind')) {
             // support binding on option like "maxLength.bind":...
             const trueName = name.substr(0, name.length - 5);
             const optionEval = valueEvaluator(v);
-            variation[`$${trueName}`] = optionEval(scope);
-          } else {
-            variation[`$${name}`] = v;
+            variation[`$${trueName}`] = optionEval(withStaticOptions);
           }
         });
 
