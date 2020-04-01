@@ -322,6 +322,23 @@ test('Validation: user defined transformer works', t => {
   t.end();
 });
 
+test('Validation: user defined global transformer works', t => {
+  Validation.addTransformer(
+    rule => (rule && _.isString(rule.ifNot) && !_.isEmpty(_.omit(rule, 'ifNot'))),
+    rule => {
+      const {ifNot, ...others} = rule;
+      return {if: `!(${ifNot})`, ...others};
+    }
+  );
+
+  const rule = {value: {ifNot: "type == 'abc'", validate: "mandatory"}};
+  const v = new Validation();
+
+  t.equal(v.validate({type: 'abc', value: ''}, rule), undefined);
+  t.deepEqual(v.validate({type: 'xyz', value: ''}, rule), {value: ["must not be empty"]});
+  t.end();
+});
+
 test('Validation: user defined validator', t => {
   v.addValidator(
     "allowNA",
@@ -337,15 +354,47 @@ test('Validation: user defined validator', t => {
   t.end();
 });
 
+test('Validation: user defined global validator', t => {
+  Validation.addValidator(
+    "allowNA",
+    {validate: "skipImmediatelyIf", value: "$value == 'NA'"}
+  );
+
+  const rule = {
+    value: ['allowNA', {validate: "within", items: ["A", "B"]}]
+  };
+  const v = new Validation();
+
+  t.equal(v.validate({value: 'NA'}, rule), undefined);
+  t.deepEqual(v.validate({value: 'C'}, rule), {value: ["must be one of A, B"]});
+  t.end();
+});
+
 test('Validation: user defined validator with function can access option', t => {
   v.addValidator("atLeast", (value, propertyPath, context, get) => {
-    console.log(JSON.stringify(get("$length")));
     const length = get("$length") || 8; // default to 8
 
     if (!(value && value.length >= length)) {
       return `must be at least ${length} characters long`;
     }
   });
+
+  t.deepEqual(v.validate("abc", "atLeast"), ["must be at least 8 characters long"]);
+  t.equal(v.validate("abc", {validate: "atLeast", length: 2}), undefined);
+  t.deepEqual(v.validate("a", {validate: "atLeast", length: 2}), ["must be at least 2 characters long"]);
+  t.end();
+});
+
+test('Validation: user defined global validator with function can access option', t => {
+  Validation.addValidator("atLeast", (value, propertyPath, context, get) => {
+    const length = get("$length") || 8; // default to 8
+
+    if (!(value && value.length >= length)) {
+      return `must be at least ${length} characters long`;
+    }
+  });
+
+  const v = new Validation();
 
   t.deepEqual(v.validate("abc", "atLeast"), ["must be at least 8 characters long"]);
   t.equal(v.validate("abc", {validate: "atLeast", length: 2}), undefined);

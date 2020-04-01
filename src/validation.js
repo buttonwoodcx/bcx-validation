@@ -3,30 +3,70 @@ import valueEvaluator from './value-evaluator';
 import scopeVariation from './scope-variation';
 import validatorChain from './validator-chain';
 import standardValidatorWrap from './standard-validator-wrap';
-import {config as configStandardValidators} from './standard-validators';
+import {config} from './standard-validators';
 import _ from 'lodash';
 
 const NAME_FORMAT = /^[a-z][a-z0-9_]+/i;
 const NAME_FORMAT_ERROR = 'validation name must start with a letter, followed by letters, digits or underscore (_)';
 const PASSED = standardValidatorWrap(() => undefined);
 
-class Validation {
+function addTransformer(tester, transformer) {
+  let testFunc;
+  if (_.isFunction(tester)) {
+    testFunc = tester;
+  } else {
+    throw new Error('Invalid transformer tester: ' + tester);
+  }
 
+  this._transformers.push({
+    test: testFunc,
+    transformer
+  });
+}
+
+function addValidator(validationName, imp) {
+    const name = _.trim(validationName);
+  if (_.isEmpty(name)) throw new Error("Missing validation name.");
+
+  if (!NAME_FORMAT.test(name)) {
+    throw new Error(`${name} : ${NAME_FORMAT_ERROR}`);
+  }
+
+  const tester = r => _.get(r, 'validate') === name;
+
+  this._validators[name] = imp;
+}
+
+function addHelper(name, helper) {
+  if (_.isString(name) && !_.isEmpty(name)) {
+    this._helpers[name] = helper;
+  }
+}
+
+class Validation {
   constructor(opts = {}) {
     this.resolveValidator = this.resolveValidator.bind(this);
     this._validate = this._validate.bind(this);
 
     this._transformers = [];
     this._validators = {};
+    this._helpers = {};
 
-    this.standardHelpers = {};
-    this.withStandardValidators();
-    // add lodash to helper by default
-    this.addHelper('_', _);
+    this.addTransformer = addTransformer;
+    this.addValidator = addValidator;
+    this.addHelper = addHelper;
   }
 
-  withStandardValidators() {
-    configStandardValidators(this);
+  get transformers() {
+    return [...Validation._transformers, ...this._transformers];
+  }
+
+  get validators() {
+    return {...Validation._validators, ...this._validators, };
+  }
+
+  get helpers() {
+    return {...Validation._helpers, ...this._helpers};
   }
 
   buildValidator(rule, inPropertyName) {
@@ -68,10 +108,11 @@ class Validation {
   }
 
   resolveValidator(rule, inPropertyName) {
+    const validators = this.validators;
     const isAlias = _.isString(rule);
 
-    const _transformer = !isAlias && _.find(this._transformers, v => v.test(rule));
-    let _validator = isAlias && this._validators[rule];
+    const _transformer = !isAlias && _.find(this.transformers, v => v.test(rule));
+    let _validator = isAlias && validators[rule];
 
     if (_transformer) {
       // transformer
@@ -83,7 +124,7 @@ class Validation {
       }
     } else if (!_validator) {
       const name = _.get(rule, 'validate');
-      if (_.isString(name)) _validator = this._validators[name];
+      if (_.isString(name)) _validator = validators[name];
     }
 
     if (_validator) {
@@ -138,39 +179,6 @@ class Validation {
     }
   }
 
-  addTransformer(tester, transformer) {
-    let testFunc;
-    if (_.isFunction(tester)) {
-      testFunc = tester;
-    } else {
-      throw new Error('Invalid transformer tester: ' + tester);
-    }
-
-    this._transformers.push({
-      test: testFunc,
-      transformer
-    });
-  }
-
-  addValidator(validationName, imp) {
-    const name = _.trim(validationName);
-    if (_.isEmpty(name)) throw new Error("Missing validation name.");
-
-    if (!NAME_FORMAT.test(name)) {
-      throw new Error(`${name} : ${NAME_FORMAT_ERROR}`);
-    }
-
-    const tester = r => _.get(r, 'validate') === name;
-
-    this._validators[name] = imp;
-  }
-
-  addHelper(name, helper) {
-    if (_.isString(name) && !_.isEmpty(name)) {
-      this.standardHelpers[name] = helper;
-    }
-  }
-
   generateValidator(rulesMap, helper) {
     const compiled = this._validate(rulesMap);
     return model => {
@@ -180,7 +188,7 @@ class Validation {
   }
 
   _buildScope(model, helper = {}) {
-    let scope = createSimpleScope(model, {...Validation.sharedHelpers, ...this.standardHelpers, ...helper});
+    let scope = createSimpleScope(model, {...Validation.sharedHelpers, ...this.helpers, ...helper});
     // initial $value and $propertyPath
     _.merge(scope.overrideContext, {$value: model, $propertyPath: null});
     return scope;
@@ -243,11 +251,16 @@ class Validation {
 
 }
 
-Validation.sharedHelpers = {};
-Validation.addHelper = function(name, helper) {
-  if (_.isString(name) && !_.isEmpty(name)) {
-    Validation.sharedHelpers[name] = helper;
-  }
-};
+Validation._helpers = {};
+Validation.addHelper = addHelper;
+Validation._transformers = [];
+Validation.addTransformer = addTransformer;
+Validation._validators = {};
+Validation.addValidator = addValidator;
+
+// Add standard validators as globals
+config(Validation);
+// Add lodash to helper by default
+Validation.addHelper('_', _);
 
 export default Validation;
