@@ -1,3 +1,12 @@
+# [1.2.0](https://github.com/buttonwoodcx/bcx-validation/compare/v1.1.2...v1.2.0) (2020-04-01)
+
+
+### Features
+
+* add global addTransformer and addValidator ([280a6a1](https://github.com/buttonwoodcx/bcx-validation/commit/280a6a1997c33fe86e652140f358d4ee59ccfd9e))
+
+
+
 ## [1.1.2](https://github.com/buttonwoodcx/bcx-validation/compare/v1.1.1...v1.1.2) (2020-03-16)
 
 
