@@ -1,3 +1,12 @@
+## [1.3.1](https://github.com/buttonwoodcx/bcx-validation/compare/v1.3.0...v1.3.1) (2020-05-12)
+
+
+### Bug Fixes
+
+* leave out external deps ([d0ade98](https://github.com/buttonwoodcx/bcx-validation/commit/d0ade98cdb3ee532ec7bb77fc6c3f3c9bdfb2949))
+
+
+
 # [1.3.0](https://github.com/buttonwoodcx/bcx-validation/compare/v1.2.0...v1.3.0) (2020-05-12)
 
 
