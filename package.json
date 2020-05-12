@@ -27,7 +27,7 @@
     "tape": "^5.0.0"
   },
   "scripts": {
-    "build": "ncc build src/index.js -m",
+    "build": "ncc build src/index.js -m -e bcx-expression-evaluator -e lodash",
     "lint": "eslint src",
     "prepare": "npm run build",
     "preversion": "npm test",
