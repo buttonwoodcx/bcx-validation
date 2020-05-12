@@ -1,3 +1,12 @@
+# [1.3.0](https://github.com/buttonwoodcx/bcx-validation/compare/v1.2.0...v1.3.0) (2020-05-12)
+
+
+### Features
+
+* migrate from rollup to ncc ([91732e4](https://github.com/buttonwoodcx/bcx-validation/commit/91732e4707a3419f2dae4f4859432ef2c0572770))
+
+
+
 # [1.2.0](https://github.com/buttonwoodcx/bcx-validation/compare/v1.1.2...v1.2.0) (2020-04-01)
 
 
