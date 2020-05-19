@@ -19,7 +19,8 @@
     "@babel/core": "^7.9.6",
     "@babel/preset-env": "^7.9.6",
     "@babel/register": "^7.9.0",
-    "@zeit/ncc": "^0.22.1",
+    "@babel/cli": "^7.8.4",
+    "@zeit/ncc": "^0.22.2",
     "babel-eslint": "^10.1.0",
     "eslint": "^7.0.0",
     "standard-changelog": "^2.0.24",
@@ -27,7 +28,8 @@
     "tape": "^5.0.0"
   },
   "scripts": {
-    "build": "ncc build src/index.js -m -e bcx-expression-evaluator -e lodash",
+    "prebuild": "ncc build src/index.js -m -e bcx-expression-evaluator -e lodash -o packed",
+    "build": "babel packed/index.js -o dist/index.js",
     "lint": "eslint src",
     "prepare": "npm run build",
     "preversion": "npm test",
@@ -43,7 +45,7 @@
     "index.d.ts"
   ],
   "dependencies": {
-    "bcx-expression-evaluator": "^1.2.0",
+    "bcx-expression-evaluator": "^1.2.1",
     "lodash": "^4.17.15"
   }
 }
