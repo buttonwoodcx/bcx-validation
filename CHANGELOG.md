@@ -1,3 +1,12 @@
+## [1.3.2](https://github.com/buttonwoodcx/bcx-validation/compare/v1.3.1...v1.3.2) (2020-05-19)
+
+
+### Bug Fixes
+
+* babel after ncc to support es5 ([1098763](https://github.com/buttonwoodcx/bcx-validation/commit/1098763bc44a7907767e422f7ead12e3c44dd910))
+
+
+
 ## [1.3.1](https://github.com/buttonwoodcx/bcx-validation/compare/v1.3.0...v1.3.1) (2020-05-12)
 
 
