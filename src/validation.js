@@ -262,5 +262,6 @@ Validation.addValidator = addValidator;
 config(Validation);
 // Add lodash to helper by default
 Validation.addHelper('_', _);
+Validation.addHelper('JSON', JSON);
 
 export default Validation;

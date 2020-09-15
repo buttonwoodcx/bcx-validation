@@ -52,12 +52,12 @@ test('unique: tests unique across neighbours on primitive value', t => {
   t.end();
 });
 
-test('unique: works behind nested rule', t => {
+test('unique: works behind nested rule, works with object value', t => {
   let rule = {
     meta: {
       customers: {
         foreach: {
-          details: {name: ["mandatory", "unique"]}
+          details: {name: ["mandatory", "unique"], ref: "unique"}
         }
       }
     }
@@ -66,19 +66,19 @@ test('unique: works behind nested rule', t => {
   t.deepEqual(v.validate({
     meta: {
       customers: [
-        {details: {name: 'Bob'}},
-        {details: {name: 'Ali'}},
-        {details: {name: 'Bob'}},
-        {details: {name: ' '}},
-        {details: {name: 'Cloc'}}
+        {details: {name: 'Bob', ref: {id: 1}}},
+        {details: {name: 'Ali', ref: {id: 2}}},
+        {details: {name: 'Bob', ref: {id: 3}}},
+        {details: {name: ' ', ref: {id: 3}}},
+        {details: {name: 'Cloc', ref: {id: 4}}}
       ]
     }
   }, rule), {
     meta: {
       customers: {
         '0': {details: {name: ['must be unique']}},
-        '2': {details: {name: ['must be unique']}},
-        '3': {details: {name: ['must not be empty']}}
+        '2': {details: {name: ['must be unique'], ref: ['must be unique']}},
+        '3': {details: {name: ['must not be empty'], ref: ['must be unique']}},
       }
     }
   });

@@ -286,14 +286,14 @@ export function config (validation) {
 
   // {validate: 'within', items: [ ... ], caseInsensitive: true}
   validation.addValidator("within", [
-    {if: "!$caseInsensitive", validate: "isTrue", value: "_.includes($items, $value)", message: "must be one of ${_.join($items, ', ')}"},
-    {if: "$caseInsensitive", validate: "isTrue", value: "_.includes(_.map($items, _.toLower), _.toLower($value))", message: "must be one of ${_.join($items, ', ')}"},
+    {if: "!$caseInsensitive", validate: "isTrue", value: "_.differenceWith([$value], $items, _.isEqual).length === 0", message: "must be one of ${_.join(_.map($items, JSON.stringify), ', ')}"},
+    {if: "$caseInsensitive", validate: "isTrue", value: "_.includes(_.map($items, _.toLower), _.toLower($value))", message: "must be one of ${_.join(_.map($items, JSON.stringify), ', ')}"},
   ]);
 
   // {validate: 'notIn', items: [ ... ], caseInsensitive: true}
   validation.addValidator("notIn", [
-    {if: "!$caseInsensitive", validate: "isFalse", value: "_.includes($items, $value)", message: "must not be one of ${_.join($items, ', ')}"},
-    {if: "$caseInsensitive", validate: "isFalse", value: "_.includes(_.map($items, _.toLower), _.toLower($value))", message: "must not be one of ${_.join($items, ', ')}"},
+    {if: "!$caseInsensitive", validate: "isFalse", value: "_.differenceWith([$value], $items, _.isEqual).length === 0", message: "must not be one of ${_.join(_.map($items, JSON.stringify), ', ')}"},
+    {if: "$caseInsensitive", validate: "isFalse", value: "_.includes(_.map($items, _.toLower), _.toLower($value))", message: "must not be one of ${_.join(_.map($items, JSON.stringify), ', ')}"},
   ]);
 
   // {validate: 'contain', item: obj, /* or items: [...] */}
