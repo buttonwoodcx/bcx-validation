@@ -1,3 +1,16 @@
+## [2.0.1](https://github.com/buttonwoodcx/bcx-validation/compare/v2.0.0...v2.0.1) (2021-07-06)
+
+
+
+## [1.3.3](https://github.com/buttonwoodcx/bcx-validation/compare/v1.3.2...v1.3.3) (2020-09-15)
+
+
+### Bug Fixes
+
+* support object value in within, notIn and unique validators ([752c3f2](https://github.com/buttonwoodcx/bcx-validation/commit/752c3f261953cad046df295d75d382aacf9c2b88))
+
+
+
 # [2.0.0](https://github.com/buttonwoodcx/bcx-validation/compare/v1.3.2...v2.0.0) (2021-07-06)
 
 
