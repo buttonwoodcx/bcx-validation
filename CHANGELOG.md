@@ -1,3 +1,18 @@
+# [2.0.0](https://github.com/buttonwoodcx/bcx-validation/compare/v1.3.2...v2.0.0) (2021-07-06)
+
+
+### Features
+
+* use scope-eval and contextual-proxy to replace bcx-expression-evaluator ([5944614](https://github.com/buttonwoodcx/bcx-validation/commit/5944614352cd76bb79d78e36a85cc0bf278a4f87))
+
+
+### BREAKING CHANGES
+
+* the expression behaviour is now different from bcx-expression-evaluator,
+noticably not silent exception on accessing property of undefined.
+
+
+
 ## [1.3.2](https://github.com/buttonwoodcx/bcx-validation/compare/v1.3.1...v1.3.2) (2020-05-19)
 
 
