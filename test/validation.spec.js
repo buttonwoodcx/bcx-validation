@@ -350,7 +350,7 @@ test('Validation: user defined validator', t => {
   };
 
   t.equal(v.validate({value: 'NA'}, rule), undefined);
-  t.deepEqual(v.validate({value: 'C'}, rule), {value: ["must be one of A, B"]});
+  t.deepEqual(v.validate({value: 'C'}, rule), {value: ['must be one of "A", "B"']});
   t.end();
 });
 
@@ -366,7 +366,7 @@ test('Validation: user defined global validator', t => {
   const v = new Validation();
 
   t.equal(v.validate({value: 'NA'}, rule), undefined);
-  t.deepEqual(v.validate({value: 'C'}, rule), {value: ["must be one of A, B"]});
+  t.deepEqual(v.validate({value: 'C'}, rule), {value: ['must be one of "A", "B"']});
   t.end();
 });
 

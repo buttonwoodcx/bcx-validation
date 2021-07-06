@@ -163,7 +163,7 @@ class Validation {
         _.forOwn(options, (v, name) => {
           if (_.endsWith(name, '.bind')) {
             // support binding on option like "maxLength.bind":...
-            const trueName = name.substr(0, name.length - 5);
+            const trueName = name.slice(0, -5);
             const optionEval = valueEvaluator(v);
             variation[`$${trueName}`] = optionEval(withStaticOptions);
           }
@@ -266,5 +266,6 @@ Validation.addValidator = addValidator;
 config(Validation);
 // Add lodash to helper by default
 Validation.addHelper('_', _);
+Validation.addHelper('JSON', JSON);
 
 export default Validation;
