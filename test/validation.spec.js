@@ -284,7 +284,7 @@ test('Validation: can add shared helper', t => {
   Validation.addHelper('sum2', (a, b) => a + b);
 
   let rules = {
-    a: {validate: 'number', value: 'sum($value, b)', greaterThan: 10, message: "sum2(${sum2($value, b)}) is not more than 10"}
+    a: {validate: 'number', value: 'sum2($value, b)', greaterThan: 10, message: "sum2(${sum2($value, b)}) is not more than 10"}
   };
 
   const v = new Validation();

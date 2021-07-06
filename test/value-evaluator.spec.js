@@ -1,6 +1,6 @@
 import test from 'tape';
 import valueEvaluator from '../src/value-evaluator';
-import {createSimpleScope} from 'bcx-expression-evaluator';
+import proxy from 'contextual-proxy';
 import _ from 'lodash';
 
 const $value = "abc";
@@ -14,8 +14,7 @@ const $model = {
 
 const $parentModel = new Object();
 
-let scope = createSimpleScope($model, $parentModel);
-_.merge(scope.overrideContext, {
+let scope = proxy($model, $parentModel, {
   $value,
   $propertyPath,
   $neighbours

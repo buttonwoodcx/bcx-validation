@@ -64,7 +64,7 @@ test('Validation: can use helper', t => {
   t.equal(v.validate({a: ['bar', 'foo']}, rule, {myjoin}), undefined);
 
   // if helper is missing
-  t.deepEqual(v.validate({a: ['bar', 'foo']}, rule), {a: ['lorem']}, 'missing helper yields undefined');
+  t.throws(() => v.validate({a: ['bar', 'foo']}, rule));
   t.end();
 });
 

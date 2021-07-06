@@ -31,7 +31,7 @@ export default function (validator, opts = {}) {
     const overrideMessage = (!result.isValid && messageEvaluator) ?
                             messageEvaluator(scopeVariation(_scope, {
                               // use original scope $value, not overrided value
-                              $value: scope.overrideContext.$value,
+                              $value: scope.$value,
                               // pass original errors
                               $errors: result.errors
                             })) :

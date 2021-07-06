@@ -1,11 +1,10 @@
 import _ from 'lodash';
-
-export function modifiedOverrideContext(overrideContext, variation) {
-  return {...overrideContext, ...variation};
-}
+import proxy from 'contextual-proxy';
 
 export default function (scope, variation) {
   if (_.isEmpty(variation)) return scope;
-  let {bindingContext, overrideContext} = scope;
-  return {bindingContext, overrideContext: modifiedOverrideContext(overrideContext, variation)};
+  let {$this, $parent, $contextual} = scope;
+  const contextual = Object.create($contextual);
+  Object.assign(contextual, variation);
+  return proxy($this, $parent, contextual);
 }

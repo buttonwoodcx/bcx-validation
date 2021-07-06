@@ -3,7 +3,7 @@ import _ from 'lodash';
 import standardValidatorWrap from '../src/standard-validator-wrap';
 import valueEvaluator from '../src/value-evaluator';
 import scopeVariation from '../src/scope-variation';
-import {createSimpleScope} from 'bcx-expression-evaluator';
+import proxy from 'contextual-proxy';
 
 const w = standardValidatorWrap;
 
@@ -25,14 +25,13 @@ test('standardValidatorWrap: forces break', t => {
 });
 
 test('standardValidatorWrap: overrides error message', t => {
-  const s = createSimpleScope({});
+  const s = proxy({});
   t.deepLooseEqual(w(() => "foo", {message: 'bar'})(s), {isValid: false, errors: ['bar']});
   t.end();
 });
 
 test('standardValidatorWrap: overrides error message with string interoperation', t => {
-  const s = createSimpleScope({});
-  s.overrideContext.$value = 'test';
+  const s = proxy({}, undefined, {$value: 'test'});
   t.deepLooseEqual(w({
     $patchScope: scope => scopeVariation(scope, {$value: 'lorem'}),
     $validator: () => "foo"
@@ -41,8 +40,7 @@ test('standardValidatorWrap: overrides error message with string interoperation'
 });
 
 test('standardValidatorWrap: overrides error message with function', t => {
-  const s = createSimpleScope({});
-  s.overrideContext.$value = 'test';
+  const s = proxy({}, undefined, {$value: 'test'});
   t.deepLooseEqual(w(() => "foo", {message: v => v + ' is invalid'})(s), {isValid: false, errors: ['test is invalid']});
   t.end();
 });
@@ -61,10 +59,8 @@ test('standardValidatorWrap: patches scope', t => {
     }
   };
 
-  const good = createSimpleScope({});
-  good.overrideContext.$value = 'good';
-  const bad = createSimpleScope({});
-  bad.overrideContext.$value = 'bad';
+  const good = proxy({}, undefined, {$value: 'good'});
+  const bad = proxy({}, undefined, { $value: 'bad' });
   t.deepLooseEqual(w(validator)(good), {isValid: true});
   t.deepLooseEqual(w(validator, {message: 'length of ${$value} is less than ${$min}'})(good), {isValid: true});
   t.deepLooseEqual(w(validator)(bad), {isValid: false, errors: ['foo']});

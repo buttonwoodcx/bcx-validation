@@ -1,6 +1,7 @@
 import _ from 'lodash';
-import {createOverrideContext} from 'bcx-expression-evaluator';
+import proxy from 'contextual-proxy';
 import valueEvaluator from './value-evaluator';
+import canBeProxied from './can-be-proxied';
 
 export function isBlank(v) {
   if (_.isNull(v) || _.isUndefined(v) || _.isNaN(v)) return true;
@@ -56,19 +57,12 @@ export const switchTransformer = function (rule, validate, inPropertyName) {
 
   const validator = scope => {
     // make a guess whether user try to use nested validation or plain validation
-    const value = scope.overrideContext.$value;
+    const value = scope.$value;
     let precompiled, precompiledDefault;
 
     if (_.isObjectLike(value)) {
       // in nested object
-      const {overrideContext} = scope;
-      let newOverrideContext = createOverrideContext(value, overrideContext);
-      newOverrideContext.$value = value;
-      const newScope = {
-        bindingContext: value,
-        overrideContext: newOverrideContext
-      };
-
+      const newScope = proxy(value, scope, {$value: value});
       precompiled = precompiledNested[switchEvaluator(newScope)];
       precompiledDefault = precompiledNestedDefault;
     } else {
@@ -107,23 +101,19 @@ export const forEachTransformer = function (rule, validate /*, inPropertyName*/)
   }
 
   // don't pass inPropertyName to underneath validators,
-  // they work in new overrideContext with propertyPath null.
+  // they work in new scope with propertyPath null.
   const precompiled = !foreachRulesMapFunc && validate(foreachRulesMap);
 
   const _key = _.get(rule, 'key', '$index');
   const keyEvaluator = valueEvaluator(_key);
 
   const validator = scope => {
-    let errors = {};
-    const enumerable = scope.overrideContext.$value;
+    const errors = {};
+    const enumerable = scope.$value;
     const length = _.size(enumerable);
     _.each(enumerable, (item, index) => {
-      const {overrideContext} = scope;
-      let newOverrideContext = createOverrideContext(item, overrideContext);
-
-      let neighbours = _.filter(enumerable, (v, i) => i !== index);
-
-      _.merge(newOverrideContext, {
+      const neighbours = _.filter(enumerable, (v, i) => i !== index);
+      const newScope = proxy(canBeProxied(item) ? item : {}, scope, {
         $value: item,
         $propertyPath: null, // initial propertyPath
         $neighbours: neighbours,
@@ -132,11 +122,6 @@ export const forEachTransformer = function (rule, validate /*, inPropertyName*/)
         $first: index === 0,
         $last: (index === length - 1),
       });
-
-      const newScope = {
-        bindingContext: item,
-        overrideContext: newOverrideContext
-      };
 
       const key = keyEvaluator(newScope);
       const result = (precompiled || validate(foreachRulesMapFunc(newScope)))(newScope);

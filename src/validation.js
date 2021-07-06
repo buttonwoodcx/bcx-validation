@@ -1,9 +1,11 @@
-import {createSimpleScope} from 'bcx-expression-evaluator';
+import proxy from 'contextual-proxy';
 import valueEvaluator from './value-evaluator';
 import scopeVariation from './scope-variation';
 import validatorChain from './validator-chain';
 import standardValidatorWrap from './standard-validator-wrap';
-import {config} from './standard-validators';
+import { config } from './standard-validators';
+import canBeProxied from './can-be-proxied';
+
 import _ from 'lodash';
 
 const NAME_FORMAT = /^[a-z][a-z0-9_]+/i;
@@ -188,10 +190,12 @@ class Validation {
   }
 
   _buildScope(model, helper = {}) {
-    let scope = createSimpleScope(model, {...Validation.sharedHelpers, ...this.helpers, ...helper});
-    // initial $value and $propertyPath
-    _.merge(scope.overrideContext, {$value: model, $propertyPath: null});
-    return scope;
+    return proxy(
+      canBeProxied(model) ? model : {},
+      { ...Validation.sharedHelpers, ...this.helpers, ...helper },
+      // initial $value and $propertyPath
+      { $value: model, $propertyPath: null }
+    );
   }
 
   validate(model, rulesMap, helper = {}) {
@@ -226,8 +230,8 @@ class Validation {
         _.each(rulesMap, (rules, propertyName) => {
           const path = inPropertyName ? [...inPropertyName, propertyName] : [propertyName];
 
-          const value = _.get(valueEvaluator('$this')(scope), path);
-          const neighbourValues = _.map(valueEvaluator('$neighbours')(scope), _.property(path));
+          const value = _.get(scope.$this, path);
+          const neighbourValues = _.map(scope.$neighbours, _.property(path));
           const localScope = scopeVariation(scope, {
             $value: value,
             $propertyPath: path,

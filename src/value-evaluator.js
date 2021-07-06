@@ -1,18 +1,38 @@
 import _ from 'lodash';
-import {Parser} from 'bcx-expression-evaluator';
+import ScopedEval from 'scoped-eval';
 
-const parser = new Parser();
+const scopedEval = new ScopedEval();
+const cache = Object.create(null);
+
+function build(expression, opts) {
+  if (!cache[expression]) {
+    try {
+      if (opts && opts.stringInterpolationMode) {
+        expression = "`" + expression + "`";
+      }
+      cache[expression] = scopedEval.build(expression);
+    } catch (e) {
+      throw new Error(`Failed to parse expression: ${JSON.stringify(expression)}\n${e.message}`);
+    }
+  }
+  return cache[expression];
+}
 
 export default function (input, opts) {
-
   if (_.isString(input) && _.trim(input).length) {
-    const expression = parser.parse(input, opts);
-    return scope => expression.evaluate(scope);
+    const func = build(input, opts);
+    return scope => {
+      try {
+        return func.call(scope);
+      } catch (e) {
+        throw new Error(`Failed to execute expression: ${JSON.stringify(input)}\n${e.message}`);
+      }
+    };
   }
 
   if (_.isRegExp(input)) {
     return scope => {
-      return input.test(scope.overrideContext.$value);
+      return input.test(scope.$value);
     };
   }
 
@@ -20,10 +40,17 @@ export default function (input, opts) {
     const func = input;
 
     return scope => {
-      const value = scope.overrideContext.$value;
-      const propertyPath = scope.overrideContext.$propertyPath;
-      const context = scope.overrideContext.bindingContext;
-      const get = expression => parser.parse(expression).evaluate(scope);
+      const value = scope.$value;
+      const propertyPath = scope.$propertyPath;
+      const context = scope.$this;
+      const get = expression => {
+        const func = build(expression);
+        try {
+          return func.call(scope);
+        } catch (e) {
+          throw new Error(`Failed to execute expression: ${JSON.stringify(input)}\n${e.message}`);
+        }
+      };
 
       return func(value, propertyPath, context, get);
     };
