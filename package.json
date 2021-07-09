@@ -47,6 +47,6 @@
   "dependencies": {
     "contextual-proxy": "^0.2.0",
     "lodash": "^4.17.21",
-    "scoped-eval": "^0.1.0"
+    "scoped-eval": "^0.2.0"
   }
 }

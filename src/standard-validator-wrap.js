@@ -12,7 +12,7 @@ export default function (validator, opts = {}) {
   let messageEvaluator;
 
   if (message) {
-    messageEvaluator = valueEvaluator(message, {stringInterpolationMode: true});
+    messageEvaluator = valueEvaluator(message, true);
   }
 
   return scope => {

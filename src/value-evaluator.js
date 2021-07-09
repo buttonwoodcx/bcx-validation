@@ -4,13 +4,10 @@ import ScopedEval from 'scoped-eval';
 const scopedEval = new ScopedEval();
 const cache = Object.create(null);
 
-function build(expression, opts) {
+function build(expression, stringInterpolationMode = false) {
   if (!cache[expression]) {
     try {
-      if (opts && opts.stringInterpolationMode) {
-        expression = "`" + expression + "`";
-      }
-      cache[expression] = scopedEval.build(expression);
+      cache[expression] = scopedEval.build(expression, stringInterpolationMode);
     } catch (e) {
       throw new Error(`Failed to parse expression: ${JSON.stringify(expression)}\n${e.message}`);
     }
@@ -18,9 +15,9 @@ function build(expression, opts) {
   return cache[expression];
 }
 
-export default function (input, opts) {
+export default function (input, stringInterpolation) {
   if (_.isString(input) && _.trim(input).length) {
-    const func = build(input, opts);
+    const func = build(input, stringInterpolation);
     return scope => {
       try {
         return func.call(scope);
