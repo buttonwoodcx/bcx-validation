@@ -2,9 +2,11 @@ import _ from 'lodash';
 import ScopedEval from 'scoped-eval';
 
 const scopedEval = new ScopedEval();
-const cache = Object.create(null);
+const expCache = Object.create(null);
+const interoperationCache = Object.create(null);
 
 function build(expression, stringInterpolationMode = false) {
+  const cache = stringInterpolationMode ? interoperationCache : expCache;
   if (!cache[expression]) {
     try {
       cache[expression] = scopedEval.build(expression, stringInterpolationMode);
