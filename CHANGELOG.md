@@ -35,7 +35,7 @@
 ### BREAKING CHANGES
 
 * the expression behaviour is now different from bcx-expression-evaluator,
-noticably not silent exception on accessing property of undefined.
+notably not silent exception on accessing property of undefined.
 
 
 

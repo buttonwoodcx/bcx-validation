@@ -34,7 +34,7 @@
     "prepare": "npm run build",
     "preversion": "npm test",
     "version": "standard-changelog && git add CHANGELOG.md",
-    "postversion": "git push && git push --tags && npm publish --tag next",
+    "postversion": "git push && git push --tags && npm publish",
     "pretest": "npm run lint",
     "test": "tape -r @babel/register 'test/**/*.spec.js' | tap-nirvana"
   },
