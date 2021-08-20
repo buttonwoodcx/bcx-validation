@@ -16,15 +16,15 @@
   "license": "MIT",
   "author": "Chunpeng Huo",
   "devDependencies": {
-    "@babel/core": "^7.14.8",
-    "@babel/preset-env": "^7.14.8",
-    "@babel/register": "^7.14.5",
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/register": "^7.15.3",
     "@babel/cli": "^7.14.8",
-    "@vercel/ncc": "^0.29.0",
+    "@vercel/ncc": "^0.29.2",
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.31.0",
+    "eslint": "^7.32.0",
     "standard-changelog": "^2.0.27",
-    "tape": "^5.2.2"
+    "tape": "^5.3.1"
   },
   "scripts": {
     "prebuild": "ncc build src/index.js -m -e contextual-proxy -e scoped-eval -e lodash -o packed",
@@ -44,8 +44,8 @@
     "index.d.ts"
   ],
   "dependencies": {
-    "contextual-proxy": "^0.2.0",
+    "contextual-proxy": "^0.2.2",
     "lodash": "^4.17.21",
-    "scoped-eval": "^0.3.0"
+    "scoped-eval": "^0.4.0"
   }
 }

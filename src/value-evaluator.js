@@ -22,7 +22,7 @@ export default function (input, stringInterpolation) {
     const func = build(input, stringInterpolation);
     return scope => {
       try {
-        return func.call(scope);
+        return func(scope);
       } catch (e) {
         throw new Error(`Failed to execute expression: ${JSON.stringify(input)}\n${e.message}`);
       }
@@ -45,7 +45,7 @@ export default function (input, stringInterpolation) {
       const get = expression => {
         const func = build(expression);
         try {
-          return func.call(scope);
+          return func(scope);
         } catch (e) {
           throw new Error(`Failed to execute expression: ${JSON.stringify(input)}\n${e.message}`);
         }
