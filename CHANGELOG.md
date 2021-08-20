@@ -1,3 +1,12 @@
+# [2.1.0](https://github.com/buttonwoodcx/bcx-validation/compare/v2.0.4...v2.1.0) (2021-08-20)
+
+
+### Bug Fixes
+
+* upgrade scope-eval to properly support function scope ([52a2a58](https://github.com/buttonwoodcx/bcx-validation/commit/52a2a589af86b7bc342945200bbe408ca859539d))
+
+
+
 ## [2.0.4](https://github.com/buttonwoodcx/bcx-validation/compare/v2.0.3...v2.0.4) (2021-07-24)
 
 
